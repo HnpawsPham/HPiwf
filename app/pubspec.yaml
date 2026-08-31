@@ -39,6 +39,12 @@ dependencies:
   intl: ^0.20.3
   mqtt_client: ^10.11.11
   flutter_onnxruntime: ^1.8.4
+  firebase_core: ^4.14.0
+  flutter_dotenv: ^6.0.1
+  cloud_firestore: ^6.9.0
+  firebase_auth: ^6.6.1
+  google_sign_in: ^7.2.0
+  toastification: ^3.2.0
 
 dev_dependencies:
   flutter_test:

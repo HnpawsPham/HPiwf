@@ -1,5 +1,6 @@
 import 'dart:math';
-
+import 'package:hpiwf/UI/login-page.dart';
+import '../database/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:hpiwf/config.dart';
 import 'package:stroke_text/stroke_text.dart';
@@ -61,11 +62,28 @@ class _SettingPageState extends State<SettingPage> {
                 reminderTab(),
                 geofencingTab(),
                 const Center(child: Text("Reminder")),
-                const Center(child: Text("Reminder")),
+                usersTab(),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Center usersTab() {
+    return Center(
+      child: StreamBuilder(
+        stream: FBAuth.authStateChange,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
+
+          if (snapshot.hasData) return Center(child: Text("logged in"));
+
+          // if not signed in
+          return const LoginPage();
+        },
       ),
     );
   }

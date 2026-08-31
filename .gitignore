@@ -1,1 +1,12 @@
-.DS_Storen*.imln.idea/n.vscode/n.dart_tool/n.flutter-pluginsn.flutter-plugins-dependenciesn.pub-cache/n.pub/nbuild/nandroid/.gradle/nios/Pods/
+.DS_Store
+*.iml
+.idea/
+.vscode/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+android/.gradle/
+ios/Pods/

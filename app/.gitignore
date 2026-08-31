@@ -38,3 +38,6 @@ ios/.symlinks/
 
 # Secrets
 secrets.json
+firebase_options.dart
+firebase.json
+google-services.json
