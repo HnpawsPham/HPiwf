@@ -1,1 +1,11 @@
 *.onnx filter=lfs diff=lfs merge=lfs -text
+# skip c++ flutter
+app/windows/* linguist-vendored
+app/linux/* linguist-vendored
+
+# skip c++ platform io
+door-device/* linguist-vendored
+home-station/* linguist-vendored
+ibeacon/* linguist-vendored
+kitchen-device/* linguist-vendored
+wristband/* linguist-vendored
