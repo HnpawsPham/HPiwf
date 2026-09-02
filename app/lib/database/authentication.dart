@@ -7,39 +7,35 @@ class FBAuth {
   factory FBAuth() => _instance;
   FBAuth._internal();
 
-  static Stream<User?> get authStateChange => FirebaseAuth.instance.authStateChanges();
-
-  static Future<void> createAccountWithEmailPass(String email, String pass) async {
+  static Future<String?> createAccountWithEmailPass(String email, String pass) async {
     try {
       final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: pass,
       );
+      return null;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
+      if (e.code == 'email-already-in-use') return "The account already exists for that email.";
+
+      if (e.code == "unknown")
+        return "Password is too weak (at least 6 characters + 1 special character)";
+
+      return e.message;
     } catch (e) {
       print(e);
+      return "unknow error";
     }
   }
 
-  static Future<void> signInWithEmailPass(String email, String pass) async {
+  static Future<String?> signInWithEmailPass(String email, String pass) async {
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: pass,
-      );
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
+      return null;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-credential') {
-        print('Invalid email or password.');
-      } else if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-      }
+      if (e.code == 'invalid-credential') return 'Invalid email or password.';
+      if (e.code == 'user-not-found') return 'No user found for that email.';
+      if (e.code == 'wrong-password') return 'Wrong password provided.';
+      return e.message;
     }
   }
 
@@ -57,8 +53,8 @@ class FBAuth {
 
         await FirebaseAuth.instance.signInWithCredential(credential);
       }
-    } catch (err) {
-      print("sign in with gg error: $err");
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -66,4 +62,21 @@ class FBAuth {
     await GoogleSignIn.instance.disconnect();
     await FirebaseAuth.instance.signOut();
   }
+
+  // check user authentication state
+  static Stream<User?> get authStateChange =>
+      FirebaseAuth.instance.idTokenChanges().asyncMap((user) async {
+        if (user == null) return null;
+
+        try {
+          await user.reload();
+          return user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == "user-not-found") {
+            await FirebaseAuth.instance.signOut();
+            return null;
+          }
+        }
+        return user;
+      });
 }

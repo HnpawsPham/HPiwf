@@ -57,19 +57,14 @@ class _SettingPageState extends State<SettingPage> {
             ),
           ),
           Expanded(
-            child: TabBarView(
-              children: [
-                reminderTab(),
-                geofencingTab(),
-                const Center(child: Text("Reminder")),
-                usersTab(),
-              ],
-            ),
+            child: TabBarView(children: [reminderTab(), geofencingTab(), devicesTab(), usersTab()]),
           ),
         ],
       ),
     );
   }
+
+  Column devicesTab() => Column(children: [const Center(child: Text("Devices"))]);
 
   Center usersTab() {
     return Center(

@@ -14,7 +14,12 @@ void notify(BuildContext context, String content, int sec, int code) {
     context: context,
     type: notificationType[code],
     style: ToastificationStyle.flatColored,
-    title: Text(content, style: TextStyle(fontFamily: "cubano", fontSize: 18)),
+    title: Text(
+      content,
+      style: TextStyle(fontFamily: "cubano", fontSize: 18),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+    ),
     alignment: Alignment.topRight,
     autoCloseDuration: Duration(seconds: sec),
   );

@@ -105,95 +105,173 @@ class _LoginPageState extends State<LoginPage> {
 void _showInputPopup(BuildContext context) {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
+  TextEditingController _retypePassController = TextEditingController();
+
+  bool signInForm = true;
 
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: colorDarkBlue,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          "Sign in with email & password",
-          style: TextStyle(color: colorWhite, fontFamily: "cubano"),
-        ),
+      return StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 10),
+          constraints: const BoxConstraints(minWidth: 350, maxWidth: 500),
 
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+          backgroundColor: colorDarkBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            signInForm ? "SIGN IN" : "SIGN UP",
+            style: TextStyle(color: colorWhite, fontFamily: "cubano"),
+            textAlign: TextAlign.center,
+          ),
 
-          children: [
-            TextField(
-              controller: _emailController,
-              style: const TextStyle(color: colorWhite),
-              decoration: InputDecoration(
-                hintText: "Email",
-                hintStyle: TextStyle(color: colorWhite, fontSize: 18),
-                filled: true,
-                fillColor: colorBlack,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+
+            children: [
+              TextField(
+                controller: _emailController,
+                style: const TextStyle(color: colorWhite),
+                decoration: InputDecoration(
+                  hintText: "Email",
+                  hintStyle: TextStyle(color: colorWhite, fontSize: 18),
+                  filled: true,
+                  fillColor: colorBlack,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 10),
+              SizedBox(height: 10),
 
-            TextField(
-              controller: _passController,
-              style: const TextStyle(color: colorWhite),
-              decoration: InputDecoration(
-                hintText: "Password",
-                hintStyle: TextStyle(color: colorWhite, fontSize: 18),
-                filled: true,
-                fillColor: colorBlack,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
+              TextField(
+                controller: _passController,
+                style: const TextStyle(color: colorWhite),
+                decoration: InputDecoration(
+                  hintText: "Password",
+                  hintStyle: TextStyle(color: colorWhite, fontSize: 18),
+                  filled: true,
+                  fillColor: colorBlack,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
+
+              // sign up retype password
+              if (!signInForm) ...[
+                SizedBox(height: 10),
+
+                TextField(
+                  controller: _retypePassController,
+                  style: const TextStyle(color: colorWhite),
+                  decoration: InputDecoration(
+                    hintText: "Retype password",
+                    hintStyle: TextStyle(color: colorWhite, fontSize: 18),
+                    filled: true,
+                    fillColor: colorBlack,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          actions: [
+            Row(
+              children: [
+                // sign up/ sign in swtich
+                TextButton(
+                  onPressed: () => setState(() => signInForm = !signInForm),
+                  child: Text(
+                    signInForm ? "Create account" : "Sign in",
+                    style: TextStyle(
+                      color: colorWhite,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+
+                Spacer(),
+
+                // Cancel btn
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.red, fontFamily: "cubano"),
+                  ),
+                ),
+
+                // Submit btn
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: colorWhite),
+                  onPressed: () async {
+                    String emailInp = _emailController.text.trim();
+                    String passInp = _passController.text.trim();
+                    bool ok = true;
+
+                    if (emailInp.isEmpty) {
+                      print("Email is empty!");
+                      notify(context, "Email is empty!", 4, 404);
+                      ok = false;
+                    }
+                    if (passInp.isEmpty) {
+                      print("pass is empty");
+                      notify(context, "Password is empty!", 4, 404);
+                      ok = false;
+                    }
+
+                    // handle sign in
+                    if (signInForm) {
+                      if (!ok) return;
+                      String? res = await FBAuth.signInWithEmailPass(emailInp, passInp);
+
+                      if (res == null) {
+                        notify(context, "Welcome back!", 3, 200);
+                        Navigator.pop(context);
+                      } else
+                        notify(context, res, 4, 500);
+                    }
+                    // handle sign up
+                    else {
+                      String retypePassInp = _retypePassController.text.trim();
+                      if (retypePassInp.isEmpty) {
+                        print("pass is empty");
+                        notify(context, "Please retype your password", 4, 404);
+                        ok = false;
+                      } else if (retypePassInp != passInp) {
+                        print("pass and retype pass not match");
+                        notify(context, "Passwords don't match", 4, 500);
+                        ok = false;
+                      }
+
+                      if (!ok) return;
+                      String? res = await FBAuth.createAccountWithEmailPass(emailInp, passInp);
+
+                      if (res == null) {
+                        notify(context, "Welcome! Your account is created.", 5, 200);
+                        Navigator.pop(context);
+                      } else
+                        notify(context, res, 7, 500);
+                    }
+                  },
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: colorBlack, fontFamily: "cubano", fontSize: 15),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-
-        actions: [
-          // Cancel btn
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Cancel",
-              style: TextStyle(color: Colors.red, fontFamily: "cubano"),
-            ),
-          ),
-
-          // Submit btn
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: colorWhite),
-            onPressed: () {
-              String emailInp = _emailController.text.trim();
-              String passInp = _passController.text.trim();
-              bool ok = true;
-
-              if (emailInp.isEmpty) {
-                print("Email is empty!");
-                notify(context, "Email is empty!", 4, 404);
-                ok = false;
-              }
-              if (passInp.isEmpty) {
-                print("pass is empty");
-                notify(context, "Password is empty!", 4, 404);
-                ok = false;
-              }
-
-              if (ok) {
-                FBAuth.signInWithEmailPass(emailInp, passInp);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text(
-              "OK",
-              style: TextStyle(color: colorBlack, fontFamily: "cubano", fontSize: 15),
-            ),
-          ),
-        ],
       );
     },
   );
