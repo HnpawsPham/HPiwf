@@ -6,9 +6,12 @@
 #include <PubSubClient.h>
 
 extern PubSubClient client;
+extern Client* networkClient;
+extern bool CONNECTION_MODE;
+extern TinyGsmClient simClient;
 
 void initInternet();
-void initMQTT();
 void loopInternet();
+bool downloadTTS(String text);
 
 #endif

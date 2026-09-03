@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <Adafruit_MPU6050.h>
-#include <data-transfer.h>
+#include <mqtt-manager.h>
 #include <config.h>
 #include <fall-detection-ML.h>
+#include <helper.h>>
 
 using namespace std;
 Adafruit_MPU6050 mpu;
@@ -193,8 +194,10 @@ void loopMPU(){
             // Serial.print("pred: ");
             // Serial.println(ypred);
 
-            if(ypred == 0)
+            if(ypred == 0){
                 Serial.println(" " + String(millis()));
+                publish(GIDPrefix("data/fall-detect"), ".");
+            }
 
             shiftWin();
             buffId = WINSZ - STEP;
