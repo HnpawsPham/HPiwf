@@ -6,14 +6,14 @@ import 'package:hpiwf/config.dart';
 import 'package:stroke_text/stroke_text.dart';
 import 'package:intl/intl.dart';
 
-class SettingPage extends StatefulWidget {
-  const SettingPage({super.key});
+class ControlPage extends StatefulWidget {
+  const ControlPage({super.key});
 
   @override
-  State<SettingPage> createState() => _SettingPageState();
+  State<ControlPage> createState() => _ControlPageState();
 }
 
-class _SettingPageState extends State<SettingPage> {
+class _ControlPageState extends State<ControlPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -21,7 +21,7 @@ class _SettingPageState extends State<SettingPage> {
       child: Column(
         children: [
           Text(
-            "Setting",
+            "Control",
             style: TextStyle(
               color: colorWhite,
               fontSize: 40,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hpiwf/UI/setting-page.dart';
+import 'package:hpiwf/UI/control-page.dart';
+import 'package:hpiwf/UI/location-page.dart';
 import 'package:hpiwf/UI/weather-page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:stroke_text/stroke_text.dart';
@@ -14,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Widget> pages = const [DashboardPage(), WeatherPage(), SettingPage()];
+  final List<Widget> pages = const [DashboardPage(), LocationPage(), WeatherPage(), ControlPage()];
   int curPage = 0;
 
   @override
@@ -39,8 +40,9 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           children: [
             createNavItem(Icons.home, "Dashboard", 0),
-            createNavItem(Icons.sunny, "Weather", 1),
-            createNavItem(Icons.settings, "Setting", 2),
+            createNavItem(Icons.location_city, "Location", 1),
+            createNavItem(Icons.sunny, "Weather", 2),
+            createNavItem(Icons.adjust, "Control", 3),
           ],
         ),
       ),
@@ -49,12 +51,28 @@ class _HomePageState extends State<HomePage> {
 
   PreferredSizeWidget appBar() {
     return PreferredSize(
-      preferredSize: Size.fromHeight(30),
+      preferredSize: Size.fromHeight(40),
       child: AppBar(
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text("HPiwf", style: TextStyle(color: colorLightBlue, fontSize: 20)),
+        actions: [
+          GestureDetector(
+            onTap: () => print("ok"),
+            child: Container(
+              child: Icon(Icons.dark_mode, color: colorWhite, size: 30),
+              margin: const EdgeInsets.only(top: 2, right: 5, left: 2, bottom: 2),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => {},
+            child: Container(
+              child: Icon(Icons.settings, color: colorWhite, size: 30),
+              margin: const EdgeInsets.only(top: 2, right: 10, left: 2, bottom: 2),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -45,6 +45,8 @@ dependencies:
   firebase_auth: ^6.6.1
   google_sign_in: ^7.2.0
   toastification: ^3.2.0
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
 
 dev_dependencies:
   flutter_test:

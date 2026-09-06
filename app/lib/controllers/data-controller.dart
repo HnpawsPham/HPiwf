@@ -50,6 +50,7 @@ class DataController extends ChangeNotifier {
   void updateGps(double? newLat, double? newLng) {
     lat = newLat;
     lng = newLng;
+    print("$newLat  $newLng");
     notifyListeners();
   }
 
