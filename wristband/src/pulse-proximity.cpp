@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <MAX30105.h>
 #include <heartRate.h>
-#include <data-transfer.h>
+#include <mqtt-manager.h>
 #include <spo2_algorithm.h>
 #include <config.h>
+#include <helper.h>
 
 MAX30105 heartSensor;
 
@@ -57,7 +58,7 @@ void handleSPO2(){
             if(validSPO2){
                 Serial.print("SPO2: ");
                 Serial.println(SPO2);
-                publish("data/health/spo2", String(SPO2).c_str());
+                publish(GIDPrefix("data/health/spo2"), String(SPO2).c_str());
             }
             i = 0;
         }
@@ -90,7 +91,7 @@ void loopHeartSensor(){
             Serial.print("BPM: ");
             Serial.println(beatCnt);
 
-            publish("data/health/bpm", String(beatCnt).c_str());
+            publish(GIDPrefix("data/health/bpm"), String(beatCnt).c_str());
             setupSleep();
         }
         else if(MODE == 1)

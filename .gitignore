@@ -10,3 +10,7 @@
 build/
 android/.gradle/
 ios/Pods/
+.pio/
+*.o
+*.elf
+*.bin

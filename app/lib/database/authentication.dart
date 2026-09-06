@@ -15,12 +15,19 @@ class FBAuth {
       );
       return null;
     } on FirebaseAuthException catch (e) {
+<<<<<<< Updated upstream
       if (e.code == 'email-already-in-use') return "The account already exists for that email.";
 
       if (e.code == "unknown")
         return "Password is too weak (at least 6 characters + 1 special character)";
 
       return e.message;
+=======
+      if (e.code == 'weak-password') 
+        print('The password provided is too weak.');
+      else if (e.code == 'email-already-in-use') 
+        print('The account already exists for that email.');
+>>>>>>> Stashed changes
     } catch (e) {
       print(e);
       return "unknow error";
