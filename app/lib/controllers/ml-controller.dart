@@ -15,12 +15,8 @@ class MLController {
   static late final Map<String, dynamic> _airQualityLe;
 
   static Future<void> init() async {
-    _weatherTypeSession = await ort.createSessionFromAsset(
-      'assets/ML-models/weather-type-model.onnx',
-    );
-    _airQualitySession = await ort.createSessionFromAsset(
-      'assets/ML-models/air-quality-model.onnx',
-    );
+    _weatherTypeSession = await ort.createSessionFromAsset('assets/ML-models/weather-type.onnx');
+    _airQualitySession = await ort.createSessionFromAsset('assets/ML-models/air-quality.onnx');
 
     _weatherTypeLe = jsonDecode(
       await rootBundle.loadString('assets/ML-models/weather-type-le.json'),
@@ -113,13 +109,16 @@ class MLController {
     final inp = _airQualitySession.inputNames[0];
     final out = _airQualitySession.outputNames[0];
     final outputs = await _airQualitySession.run({inp: inputs});
-    print("air ok");
     final res = await outputs[out]!.asList();
 
     inputs.dispose();
     for (final tensor in outputs.values) tensor.dispose();
 
-    return _airQualityLe[res.first] ?? "Unknown";
+    final label =
+        _airQualityLe[res.first.toString()] ?? _airQualityLe[res.first] ?? res.first.toString();
+
+    print("air label= $label");
+    return label;
   }
 
   static Stream<String> getAirQualityStream() async* {

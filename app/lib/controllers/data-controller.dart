@@ -7,28 +7,28 @@ class DataController extends ChangeNotifier {
   DataController._internal();
 
   // weather info
+  // Map<String, dynamic> weatherInfo = {
+  //   "precipitation": null,
+  //   "humid": null,
+  //   "air-pressure": null,
+  //   "rain-val": null,
+  //   "temp": null,
+  //   "air-ppm": null,
+  //   "noise-delta": null,
+  // };
+
   Map<String, dynamic> weatherInfo = {
-   "precipitation": null,
-    "humid": null,
-    "air-pressure": null,
-    "rain-val": null,
-    "temp": null,
-    "air-ppm": null,
-    "noise-delta": null,
+    "precipitation": 1009,
+    "humid": 0.7,
+    "air-pressure": 1024,
+    "rain-val": 0,
+    "temp": 31,
+    "air-ppm": 234,
+    "noise-delta": 10,
   };
 
-//   Map<String, dynamic> weatherInfo = {
-//     "precipitation": 1009,
-//     "humid": 0.7,
-//     "air-pressure": 1024,
-//     "rain-val": null,
-//     "temp": 31,
-//     "air-ppm": 234,
-//     "noise-delta": null,
-//   };
-
   // health info
-  Map<String, dynamic> healthInfo = {"bpm": null, "spo2": null};
+  Map<String, dynamic> healthInfo = {"bpm": 86, "spo2": 94};
 
   // gps info
   double? lat, lng;
@@ -67,8 +67,8 @@ class DataController extends ChangeNotifier {
   String getNoiseLvl() {
     final noise = weatherInfo["noise-delta"];
     if (noise == null) return "Unknown";
-    if (noise > 80) return "High";
-    if (noise > 50) return "Moderate";
+    if (noise > 1000) return "High";
+    if (noise > 600) return "Moderate";
     return "Normal";
   }
 

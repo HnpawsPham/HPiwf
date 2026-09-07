@@ -28,7 +28,14 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             SizedBox(height: 30),
 
-            Text("You are not signed in!", style: TextStyle(fontSize: 30, color: colorWhite)),
+            Text(
+              "You are not signed in!",
+              style: TextStyle(
+                fontSize: 30,
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
 
             SizedBox(height: 50),
 

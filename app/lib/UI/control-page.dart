@@ -23,7 +23,7 @@ class _ControlPageState extends State<ControlPage> {
           Text(
             "Control",
             style: TextStyle(
-              color: colorWhite,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 40,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -64,7 +64,163 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  Column devicesTab() => Column(children: [const Center(child: Text("Devices"))]);
+  Column devicesTab() => Column(
+    children: [
+      Center(
+        child: Column(
+          children: [
+            SizedBox(height: 10),
+            Row(
+              children: [
+                SizedBox(width: 20),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(height: 10),
+                        Image.asset("assets/door-icon.png", width: 40),
+                        SizedBox(height: 10),
+                        Text(
+                          "Door width",
+                          style: TextStyle(
+                            fontFamily: "cubano",
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  fillColor: Theme.of(context).colorScheme.surface,
+                                  filled: true,
+                                  hintText: "50",
+                                  hintStyle: TextStyle(color: colorWhite.withValues(alpha: 0.5)),
+                                  contentPadding: EdgeInsets.all(0),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              " - ",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.surface,
+                              ),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  fillColor: Theme.of(context).colorScheme.surface,
+                                  filled: true,
+                                  contentPadding: EdgeInsets.all(0),
+                                  hintText: "80",
+                                  hintStyle: TextStyle(color: colorWhite.withValues(alpha: 0.5)),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              "cm",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: "cubano",
+                                color: Theme.of(context).colorScheme.surface,
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 20),
+
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: 10),
+                        Image.asset("assets/fire-icon.png", width: 46),
+                        SizedBox(height: 10),
+                        Text(
+                          "Alert height",
+                          style: TextStyle(
+                            fontFamily: "cubano",
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  fillColor: Theme.of(context).colorScheme.surface,
+                                  filled: true,
+                                  contentPadding: EdgeInsets.all(0),
+                                  hintText: "200",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              "cm",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: "cubano",
+                                color: Theme.of(context).colorScheme.surface,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 
   Center usersTab() {
     return Center(
@@ -314,7 +470,7 @@ class _ControlPageState extends State<ControlPage> {
                   margin: EdgeInsets.only(left: 25),
                   child: Text(
                     "Med name",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: colorWhite, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
 

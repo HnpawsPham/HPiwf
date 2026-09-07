@@ -22,6 +22,16 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
+  late final Stream<String> _weatherStream;
+  late final Stream<String> _airQualityStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _weatherStream = MLController.getWeatherTypeStream();
+    _airQualityStream = MLController.getAirQualityStream();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -35,7 +45,7 @@ class _WeatherPageState extends State<WeatherPage> {
                 Text(
                   "Weather",
                   style: TextStyle(
-                    color: colorWhite,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
@@ -48,7 +58,7 @@ class _WeatherPageState extends State<WeatherPage> {
                 Container(
                   width: 120,
                   child: StreamBuilder<String>(
-                    stream: MLController.getWeatherTypeStream(),
+                    stream: _weatherStream,
                     builder: (context, res) {
                       return Image.asset(weatherIcon[res.data ?? "Sunny"]!);
                     },
@@ -56,7 +66,7 @@ class _WeatherPageState extends State<WeatherPage> {
                   // sunny as default
                 ),
                 Text(
-                  DataController.instance.healthInfo["temp"] ?? "NaN",
+                  "${DataController.instance.weatherInfo["temp"] ?? "NaN"}°C",
                   style: TextStyle(
                     fontSize: 50,
                     fontFamily: "cubano",
@@ -117,7 +127,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               child: LinearProgressIndicator(
                                 backgroundColor: colorDarkBlue,
                                 color: colorWhite,
-                                value: DataController.instance.healthInfo["temp"] ?? 0.0,
+                                value: DataController.instance.weatherInfo["humid"] ?? 0.0,
                                 minHeight: 10,
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -131,6 +141,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                 fontFamily: "cubano",
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -162,8 +173,13 @@ class _WeatherPageState extends State<WeatherPage> {
                                   border: Border.all(color: colorBlack, width: 2),
                                 ),
                                 child: Text(
-                                  DataController.instance.healthInfo["air-pressure"] ?? "NaN",
-                                  style: TextStyle(fontFamily: "cubano", fontSize: 20),
+                                  DataController.instance.weatherInfo["air-pressure"]?.toString() ??
+                                      "NaN",
+                                  style: TextStyle(
+                                    fontFamily: "cubano",
+                                    fontSize: 20,
+                                    color: colorWhite,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -202,12 +218,16 @@ class _WeatherPageState extends State<WeatherPage> {
                                   border: Border.all(color: colorBlack, width: 2),
                                 ),
                                 child: StreamBuilder<String>(
-                                  stream: MLController.getAirQualityStream(),
+                                  stream: _airQualityStream,
                                   builder: (context, res) {
                                     return Text(
                                       res.data ?? "Unknown",
                                       //moderate as default
-                                      style: TextStyle(fontFamily: "cubano", fontSize: 20),
+                                      style: TextStyle(
+                                        fontFamily: "cubano",
+                                        fontSize: 20,
+                                        color: colorWhite,
+                                      ),
                                       textAlign: TextAlign.center,
                                     );
                                   },
@@ -244,7 +264,11 @@ class _WeatherPageState extends State<WeatherPage> {
                                 ),
                                 child: Text(
                                   DataController.instance.getRainLvl(),
-                                  style: TextStyle(fontFamily: "cubano", fontSize: 20),
+                                  style: TextStyle(
+                                    fontFamily: "cubano",
+                                    fontSize: 20,
+                                    color: colorWhite,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -282,7 +306,11 @@ class _WeatherPageState extends State<WeatherPage> {
                                   builder: (context, res) {
                                     return Text(
                                       DataController.instance.getNoiseLvl(),
-                                      style: TextStyle(fontFamily: "cubano", fontSize: 20),
+                                      style: TextStyle(
+                                        fontFamily: "cubano",
+                                        fontSize: 20,
+                                        color: colorWhite,
+                                      ),
                                       textAlign: TextAlign.center,
                                     );
                                   },

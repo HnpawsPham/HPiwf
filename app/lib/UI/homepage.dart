@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hpiwf/UI/control-page.dart';
 import 'package:hpiwf/UI/location-page.dart';
+import 'package:hpiwf/UI/setting-page.dart';
 import 'package:hpiwf/UI/weather-page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:stroke_text/stroke_text.dart';
@@ -15,13 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Widget> pages = const [DashboardPage(), LocationPage(), WeatherPage(), ControlPage()];
+  final List<Widget> pages = const [
+    DashboardPage(),
+    LocationPage(),
+    WeatherPage(),
+    ControlPage(),
+    SettingPage(),
+  ];
   int curPage = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colorBlack,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: appBar(),
 
       body: IndexedStack(index: curPage, children: pages),
@@ -34,12 +41,12 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Container(
         height: 80,
-        margin: const EdgeInsets.all(20),
+        margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(color: colorDarkBlue, borderRadius: BorderRadius.circular(20)),
 
         child: Row(
           children: [
-            createNavItem(Icons.home, "Dashboard", 0),
+            createNavItem(Icons.home, "Home", 0),
             createNavItem(Icons.location_city, "Location", 1),
             createNavItem(Icons.sunny, "Weather", 2),
             createNavItem(Icons.adjust, "Control", 3),
@@ -58,17 +65,32 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         title: Text("HPiwf", style: TextStyle(color: colorLightBlue, fontSize: 20)),
         actions: [
-          GestureDetector(
-            onTap: () => print("ok"),
-            child: Container(
-              child: Icon(Icons.dark_mode, color: colorWhite, size: 30),
-              margin: const EdgeInsets.only(top: 2, right: 5, left: 2, bottom: 2),
-            ),
+          ValueListenableBuilder(
+            valueListenable: themeNotifier,
+            builder: (context, value, child) {
+              return IconButton(
+                onPressed: () {
+                  themeNotifier.value = themeNotifier.value == ThemeMode.dark
+                      ? ThemeMode.light
+                      : ThemeMode.dark;
+                },
+                icon: Container(
+                  child: Icon(
+                    value == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 30,
+                  ),
+                  margin: const EdgeInsets.only(top: 2, right: 5, left: 2, bottom: 2),
+                ),
+              );
+            },
           ),
-          GestureDetector(
-            onTap: () => {},
-            child: Container(
-              child: Icon(Icons.settings, color: colorWhite, size: 30),
+          IconButton(
+            onPressed: () => setState(() {
+              curPage = 4;
+            }),
+            icon: Container(
+              child: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface, size: 30),
               margin: const EdgeInsets.only(top: 2, right: 10, left: 2, bottom: 2),
             ),
           ),
@@ -109,7 +131,7 @@ class DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text("Health Dashboard", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        Text("Health Dashboard", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
 
         SizedBox(height: 20),
         Container(
@@ -132,7 +154,11 @@ class DashboardPageState extends State<DashboardPage> {
                         ),
                         Text(
                           "BPM: " + (DataController.instance.healthInfo["bpm"] ?? "NaN").toString(),
-                          style: TextStyle(color: colorWhite, fontSize: 20, fontFamily: "cubano"),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 20,
+                            fontFamily: "cubano",
+                          ),
                         ),
                       ],
                     ),
@@ -152,7 +178,7 @@ class DashboardPageState extends State<DashboardPage> {
                     Text(
                       "SPO2: ",
                       style: TextStyle(
-                        color: colorWhite,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontFamily: "cubano",
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
@@ -161,10 +187,10 @@ class DashboardPageState extends State<DashboardPage> {
                     SizedBox(width: 5),
                     Expanded(
                       child: LinearProgressIndicator(
-                        value: DataController.instance.healthInfo["spo2"] ?? 0.0,
+                        value: DataController.instance.healthInfo["spo2"].toDouble() ?? 0.0,
                         minHeight: 10,
-                        backgroundColor: colorDarkBlue,
-                        color: colorWhite,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        color: Theme.of(context).colorScheme.onSurface,
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),

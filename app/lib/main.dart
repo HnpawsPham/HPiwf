@@ -1,5 +1,6 @@
 import "package:firebase_auth/firebase_auth.dart";
 import 'package:flutter/material.dart';
+import "package:hpiwf/config.dart";
 import "UI/homepage.dart";
 import "controllers/ml-controller.dart";
 import "controllers/mqtt-manager.dart";
@@ -34,15 +35,17 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const HomePage(),
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(
-        fontFamily: "oldstyle",
-        fontFamilyFallback: ["cubano"],
-        brightness: Brightness.dark,
-      ),
+    return ValueListenableBuilder(
+      valueListenable: themeNotifier,
+      builder: (context, curTheme, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: const HomePage(),
+          theme: AppTheme.lightMode,
+          darkTheme: AppTheme.darkMode,
+          themeMode: curTheme,
+        );
+      },
     );
   }
 }

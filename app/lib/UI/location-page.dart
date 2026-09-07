@@ -93,14 +93,16 @@ class _LocationPageState extends State<LocationPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   decoration: BoxDecoration(
-                    color: colorBlack,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [BoxShadow(color: colorBlack, blurRadius: 20)],
+                    boxShadow: [
+                      BoxShadow(color: Theme.of(context).scaffoldBackgroundColor, blurRadius: 20),
+                    ],
                   ),
                   child: Text(
                     "Location",
                     style: TextStyle(
-                      color: colorWhite,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -119,10 +121,14 @@ class _LocationPageState extends State<LocationPage> {
                   FloatingActionButton(
                     onPressed: _zoomIn,
                     heroTag: "zoom_in",
-                    backgroundColor: colorBlack,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     child: Text(
                       "+",
-                      style: TextStyle(color: colorWhite, fontSize: 30, fontFamily: "cubano"),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 30,
+                        fontFamily: "cubano",
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -131,10 +137,14 @@ class _LocationPageState extends State<LocationPage> {
                   FloatingActionButton(
                     onPressed: _zoomOut,
                     heroTag: "zoom_out",
-                    backgroundColor: colorBlack,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     child: Text(
                       "-",
-                      style: TextStyle(color: colorWhite, fontSize: 30, fontFamily: "cubano"),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 30,
+                        fontFamily: "cubano",
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),

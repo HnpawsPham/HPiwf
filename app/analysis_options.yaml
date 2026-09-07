@@ -10,6 +10,7 @@
 analyzer:
   errors:
     curly_braces_in_flow_control_structures: ignore
+    sort_child_properties_last: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:
