@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "../config.dart";
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});

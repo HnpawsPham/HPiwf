@@ -6,6 +6,15 @@ class DataController extends ChangeNotifier {
   factory DataController() => instance;
   DataController._internal();
 
+  // SETTING VARIABLES
+  Map<String, bool> systemSetting = {
+    "USE_WRISTBAND": true,
+    "USE_DOOR_DEVICE": true,
+    "USE_KITCHEN_DEVICE": true,
+    "TAKE_OFF_ALERT": true,
+    "USE_HOME_STATION": true,
+  };
+
   // weather info
   // Map<String, dynamic> weatherInfo = {
   //   "precipitation": null,
@@ -27,16 +36,16 @@ class DataController extends ChangeNotifier {
     "noise-delta": 10,
   };
 
-  // health info
-  Map<String, dynamic> healthInfo = {"bpm": 86, "spo2": 94};
+  // HEALTH INFO
+  Map<String, dynamic> healthInfo = {"bpm": 86, "spo2": 0.9};
 
-  // gps info
+  // GPS INFO
   double? lat, lng;
 
-  // notification and warning
+  // NOTIFICATION & WARNING
   bool? fallDetected, lostDetected;
 
-  // update UI
+  // UPDATE FUNCS
   void updateWeather(String key, dynamic value) {
     weatherInfo[key] = value;
     notifyListeners();
@@ -64,6 +73,12 @@ class DataController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateSetting(String key, bool val) {
+    systemSetting[key] = val;
+    notifyListeners();
+  }
+
+  // GET DATA FUNCS
   String getNoiseLvl() {
     final noise = weatherInfo["noise-delta"];
     if (noise == null) return "Unknown";

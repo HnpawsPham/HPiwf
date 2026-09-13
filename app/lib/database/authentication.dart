@@ -58,8 +58,20 @@ class FBAuth {
     }
   }
 
-  static Future<void> signOutWithGoogle() async {
-    await GoogleSignIn.instance.disconnect();
+  static Future<void> logout() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    bool isGGProvided = user.providerData.any((info) => info.providerId == "google.com");
+
+    if (isGGProvided) {
+      try {
+        await GoogleSignIn.instance.disconnect();
+        await FirebaseAuth.instance.signOut();
+      } catch (e) {
+        print(e);
+      }
+    }
     await FirebaseAuth.instance.signOut();
   }
 

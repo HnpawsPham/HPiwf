@@ -129,166 +129,196 @@ class DashboardPage extends StatefulWidget {
 class DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("Health Dashboard", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+    return ListenableBuilder(
+      listenable: DataController.instance,
+      builder: (context, child) {
+        return Column(
+          children: [
+            Text(
+              "Health Dashboard",
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
 
-        SizedBox(height: 20),
-        Container(
-          width: double.infinity,
-          margin: EdgeInsets.all(20),
-          decoration: BoxDecoration(color: colorLightBlue, borderRadius: BorderRadius.circular(20)),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Column(
+            SizedBox(height: 50),
+
+            Flexible(
+              fit: FlexFit.loose,
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        SizedBox(width: 10),
                         Image.asset(
                           "assets/heart-icon.png",
-                          width: 100,
-                          height: 100,
+                          width: 150,
+                          height: 150,
                           fit: BoxFit.contain,
+                          color: colorDarkBlue,
+                          colorBlendMode: BlendMode.srcIn,
                         ),
-                        Text(
-                          "BPM: " + (DataController.instance.healthInfo["bpm"] ?? "NaN").toString(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 20,
-                            fontFamily: "cubano",
+
+                        SizedBox(width: 20),
+
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: colorDarkBlue,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "BPM: ${DataController.instance.healthInfo["bpm"]?.toString() ?? "NaN"}",
+                                  style: TextStyle(
+                                    fontFamily: "cubano",
+                                    fontSize: 30,
+                                    color: colorWhite,
+                                  ),
+                                ),
+                                Container(width: 200, child: bpmGauge()),
+                              ],
+                            ),
                           ),
                         ),
+                        SizedBox(width: 20),
                       ],
                     ),
-                  ),
-
-                  bpmGauge(),
-                ],
-              ),
-
-              SizedBox(height: 10),
-
-              // bottom row
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Text(
-                      "SPO2: ",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: "cubano",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    Expanded(
-                      child: LinearProgressIndicator(
-                        value: DataController.instance.healthInfo["spo2"].toDouble() ?? 0.0,
-                        minHeight: 10,
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      "%",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "cubano",
-                        fontSize: 20,
-                      ),
-                    ),
+                    SizedBox(height: 30),
                   ],
                 ),
               ),
-
-              SizedBox(height: 10),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Expanded bpmGauge() {
-    return Expanded(
-      child: ClipRRect(
-        child: Align(
-          alignment: Alignment.center,
-          heightFactor: 0.5,
-          child: SfRadialGauge(
-            axes: <RadialAxis>[
-              RadialAxis(
-                minimum: 0,
-                maximum: 180,
-                showLabels: false,
-                canScaleToFit: true,
-                startAngle: 180,
-                endAngle: 0,
-
-                ranges: <GaugeRange>[
-                  GaugeRange(
-                    startValue: 0,
-                    endValue: 40,
-                    color: const Color.fromARGB(255, 127, 147, 180),
-                    startWidth: 30,
-                    endWidth: 30,
-                    label: "Low",
-                    labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+            ),
+            Container(
+              margin: EdgeInsets.all(20),
+              padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurface,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    "SPO2: ",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.surface,
+                      fontFamily: "cubano",
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
-                  GaugeRange(
-                    startValue: 40,
-                    endValue: 80,
-                    color: const Color.fromARGB(255, 175, 204, 234),
-                    startWidth: 30,
-                    endWidth: 30,
-                    label: "Avg",
-                    labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                  SizedBox(width: 5),
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: DataController.instance.healthInfo["spo2"].toDouble() ?? 0,
+                      minHeight: 13,
+                      backgroundColor: colorLightBlue,
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                  GaugeRange(
-                    startValue: 80,
-                    endValue: 130,
-                    color: colorWhite,
-                    startWidth: 30,
-                    endWidth: 30,
-                    label: "Good",
-                    labelStyle: GaugeTextStyle(fontFamily: "cubano"),
-                  ),
-                  GaugeRange(
-                    startValue: 130,
-                    endValue: 160,
-                    color: const Color.fromARGB(255, 175, 204, 234),
-                    startWidth: 30,
-                    endWidth: 30,
-                    label: "High",
-                    labelStyle: GaugeTextStyle(fontFamily: "cubano"),
-                  ),
-                  GaugeRange(
-                    startValue: 160,
-                    endValue: 180,
-                    color: const Color.fromARGB(255, 127, 147, 180),
-                    startWidth: 30,
-                    endWidth: 30,
-                    label: "!",
-                    labelStyle: GaugeTextStyle(fontFamily: "cubano"),
-                  ),
-                ],
-                pointers: <GaugePointer>[
-                  NeedlePointer(
-                    value: 90,
-                    needleColor: colorWhite,
-                    needleLength: 0.5,
-                    knobStyle: KnobStyle(color: colorWhite, knobRadius: 0.05),
+                  SizedBox(width: 8),
+                  Text(
+                    "%",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.surface,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: "cubano",
+                      fontSize: 20,
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget bpmGauge() {
+    return ClipRRect(
+      child: Align(
+        alignment: Alignment.center,
+        heightFactor: 0.3,
+        child: SfRadialGauge(
+          axes: <RadialAxis>[
+            RadialAxis(
+              minimum: 0,
+              maximum: 180,
+              showLabels: false,
+              canScaleToFit: true,
+              startAngle: 180,
+              endAngle: 0,
+
+              ranges: <GaugeRange>[
+                GaugeRange(
+                  startValue: 0,
+                  endValue: 40,
+                  color: const Color.fromARGB(255, 127, 147, 180),
+                  startWidth: 30,
+                  endWidth: 30,
+                  label: "Low",
+                  labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                ),
+                GaugeRange(
+                  startValue: 40,
+                  endValue: 80,
+                  color: const Color.fromARGB(255, 175, 204, 234),
+                  startWidth: 30,
+                  endWidth: 30,
+                  label: "Avg",
+                  labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                ),
+                GaugeRange(
+                  startValue: 80,
+                  endValue: 130,
+                  color: colorWhite,
+                  startWidth: 30,
+                  endWidth: 30,
+                  label: "Good",
+                  labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                ),
+                GaugeRange(
+                  startValue: 130,
+                  endValue: 160,
+                  color: const Color.fromARGB(255, 175, 204, 234),
+                  startWidth: 30,
+                  endWidth: 30,
+                  label: "High",
+                  labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                ),
+                GaugeRange(
+                  startValue: 160,
+                  endValue: 180,
+                  color: const Color.fromARGB(255, 127, 147, 180),
+                  startWidth: 30,
+                  endWidth: 30,
+                  label: "!",
+                  labelStyle: GaugeTextStyle(fontFamily: "cubano"),
+                ),
+              ],
+              pointers: <GaugePointer>[
+                NeedlePointer(
+                  value: 90,
+                  needleColor: colorWhite,
+                  needleLength: 0.5,
+                  knobStyle: KnobStyle(color: colorWhite, knobRadius: 0.05),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
