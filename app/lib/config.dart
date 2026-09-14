@@ -24,6 +24,7 @@ class AppTheme {
       surface: colorDarkBlue,
       onSurface: colorWhite,
       secondary: colorLightBlue,
+      tertiaryContainer: colorLightBlue
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Color.fromARGB(255, 210, 240, 255)),
@@ -42,6 +43,7 @@ class AppTheme {
       surface: Color(0xFFE1EFFB),
       onSurface: colorDarkBlue,
       secondary: colorWhite,
+      tertiaryContainer: colorBlack
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Color(0xFF0F1B26)),

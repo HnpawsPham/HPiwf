@@ -1,4 +1,6 @@
 import 'dart:math';
+import "dart:ui";
+import 'package:collection/collection.dart';
 import 'package:hpiwf/UI/login-page.dart';
 import 'package:hpiwf/controllers/data-controller.dart';
 import 'package:hpiwf/controllers/notification-manager.dart';
@@ -435,9 +437,9 @@ class _ControlPageState extends State<ControlPage> {
               subtitle: Text("Turn on to get Home Station's data", style: TextStyle(fontSize: 14)),
               secondary: Icon(Icons.hearing, size: 30),
               value: TAKE_OFF_ALERT,
-              onChanged: (TAKE_OFF_ALERT) {
-                setState() => TAKE_OFF_ALERT = !TAKE_OFF_ALERT;
-                DataController.instance.updateSetting("TAKE_OFF_ALERT", TAKE_OFF_ALERT);
+              onChanged: (USE_HOME_STATION) {
+                setState() => USE_HOME_STATION = !USE_HOME_STATION;
+                DataController.instance.updateSetting("USE_HOME_STATION", USE_HOME_STATION);
               },
             ),
           ),
@@ -496,7 +498,10 @@ class _ControlPageState extends State<ControlPage> {
                           height: 150,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: colorWhite, width: 5),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.tertiaryContainer,
+                              width: 5,
+                            ),
                             image: const DecorationImage(
                               image: AssetImage("assets/best-avt.jpg"),
                               fit: BoxFit.cover,
@@ -531,15 +536,128 @@ class _ControlPageState extends State<ControlPage> {
                       left: 0,
                       right: 0,
                       child: Center(
-                        child: Image.asset("assets/key-icon.png", width: 40, height: 40),
+                        child: Stack(
+                          children: [
+                            Transform.translate(
+                              offset: const Offset(0, 3),
+                              child: Opacity(
+                                opacity: 0.5,
+                                child: ColorFiltered(
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.black,
+                                    BlendMode.srcIn,
+                                  ),
+                                  child: Image.asset("assets/key-icon.png", width: 45, height: 45),
+                                ),
+                              ),
+                            ),
+                            Image.asset("assets/key-icon.png", width: 40, height: 40),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
 
+                SizedBox(height: 10),
+
                 SingleChildScrollView(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                 
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.all(23),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: colorDarkBlue,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 80),
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Text(
+                                    "Name here",
+                                    style: TextStyle(
+                                      fontFamily: "cubano",
+                                      color: colorWhite,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+
+                                Container(
+                                  width: 90,
+                                  height: 35,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: colorWhite,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: "View",
+                                    isExpanded: true,
+                                    alignment: Alignment.center,
+                                    dropdownColor: colorWhite,
+                                    icon: const Icon(Icons.arrow_drop_down, color: colorBlack),
+                                    elevation: 16,
+                                    borderRadius: BorderRadius.circular(15),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+
+                                    items: <String>["View", "Editor", "Admin"]
+                                        .map(
+                                          (val) => DropdownMenuItem(
+                                            value: val,
+                                            child: Align(
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                val,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(color: colorBlack),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (_) {},
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Positioned(
+                            top: 0,
+                            left: 20,
+                            bottom: 0,
+                            child: Center(
+                              child: Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                                    width: 5,
+                                  ),
+                                  image: const DecorationImage(
+                                    image: AssetImage("assets/best-avt.jpg"),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
