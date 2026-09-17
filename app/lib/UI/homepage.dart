@@ -126,12 +126,45 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => DashboardPageState();
 }
 
-class DashboardPageState extends State<DashboardPage> {
+class DashboardPageState extends State<DashboardPage> with SingleTickerProviderStateMixin {
+  late AnimationController _heartAnimController;
+  late Animation<double> _heartAnim;
+  int bpm = DataController.instance.healthInfo["bpm"];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _heartAnimController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: bpm > 0 ? (60000 ~/ bpm ~/ 2) : 800),
+    )..repeat(reverse: true);
+
+    _heartAnim = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _heartAnimController, curve: Curves.fastLinearToSlowEaseIn));
+  }
+
+  @override
+  void dispose() {
+    _heartAnimController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: DataController.instance,
       builder: (context, child) {
+        // update heart beat anim
+        bpm = DataController.instance.healthInfo["bpm"].toInt();
+        if (bpm > 0) {
+          _heartAnimController.duration = Duration(
+            milliseconds: bpm > 0 ? (60000 ~/ bpm ~/ 2) : 800,
+          );
+          _heartAnimController.repeat(reverse: true);
+        }
         return Column(
           children: [
             Text(
@@ -158,13 +191,16 @@ class DashboardPageState extends State<DashboardPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SizedBox(width: 10),
-                        Image.asset(
-                          "assets/heart-icon.png",
-                          width: 150,
-                          height: 150,
-                          fit: BoxFit.contain,
-                          color: colorDarkBlue,
-                          colorBlendMode: BlendMode.srcIn,
+                        ScaleTransition(
+                          scale: _heartAnim,
+                          child: Image.asset(
+                            "assets/heart-icon.png",
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.contain,
+                            color: colorDarkBlue,
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
                         ),
 
                         SizedBox(width: 20),
@@ -180,7 +216,7 @@ class DashboardPageState extends State<DashboardPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "BPM: ${DataController.instance.healthInfo["bpm"]?.toString() ?? "NaN"}",
+                                  "BPM: ${(bpm > 0 ? bpm.toString() : "NaN")}",
                                   style: TextStyle(
                                     fontFamily: "cubano",
                                     fontSize: 30,
@@ -311,7 +347,7 @@ class DashboardPageState extends State<DashboardPage> {
               ],
               pointers: <GaugePointer>[
                 NeedlePointer(
-                  value: 90,
+                  value: bpm.toDouble(),
                   needleColor: colorWhite,
                   needleLength: 0.5,
                   knobStyle: KnobStyle(color: colorWhite, knobRadius: 0.05),

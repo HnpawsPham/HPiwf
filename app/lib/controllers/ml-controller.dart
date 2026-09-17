@@ -83,7 +83,7 @@ class MLController {
     while (true) {
       String result = await predictWeatherType();
       yield result;
-      await Future.delayed(const Duration(seconds: 300));
+      await Future.delayed(const Duration(seconds: 1800));
     }
   }
 
@@ -125,7 +125,7 @@ class MLController {
     while (true) {
       String result = await predictAirQuality();
       yield result;
-      await Future.delayed(const Duration(seconds: 300));
+      await Future.delayed(const Duration(seconds: 1800));
     }
   }
 }

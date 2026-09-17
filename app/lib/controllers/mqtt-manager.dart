@@ -3,6 +3,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import "data-controller.dart";
 import 'dart:convert';
+import "../config.dart";
 
 final String MQTT_USERNAME = const String.fromEnvironment("MQTT_USERNAME");
 final String MQTT_SERVER = const String.fromEnvironment("MQTT_SERVER");
@@ -59,7 +60,7 @@ class MQTTManager {
 
   void sub(String topic) {
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      client.subscribe(topic, QosMap[topic] ?? MqttQos.atMostOnce);
+      client.subscribe(GIDPrefix(topic), QosMap[topic] ?? MqttQos.atMostOnce);
       print("subscribed to $topic");
     }
   }
@@ -69,7 +70,7 @@ class MQTTManager {
       final builder = MqttClientPayloadBuilder();
       builder.addString(payload);
 
-      client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+      client.publishMessage(GIDPrefix(topic), MqttQos.atLeastOnce, builder.payload!);
       print("publish $payload to $topic");
     }
   }
@@ -84,22 +85,26 @@ class MQTTManager {
 
       try {
         // notify when fall
-        if (topic == "data/health/fall") {
+        if (topic == GIDPrefix("data/health/fall")) {
           DataController.instance.setFall(true);
           print("fall detected");
         }
-        // notify when lost
-        else if (topic == "data/gps/lost")
+        // notify when lost (geofencing upcoming)
+        else if (topic == GIDPrefix("data/gps/lost"))
           DataController.instance.setLost(true);
-        // CONSTANT DATA
+        // get devices connection state
+        else if (topic.startsWith(GIDPrefix("data/connection"))) {
+          String device = topic.split('/').last;
+          DataController.instance.updateConnectionState(device, (payload == "1" ? true : false));
+        }
         // update weather info map
-        else if (topic.startsWith("data/weather"))
+        else if (topic.startsWith(GIDPrefix("data/weather")))
           DataController.instance.updateWeather(topic.split('/').last, double.tryParse(payload));
         // update health info map
-        else if (topic.startsWith("data/health"))
+        else if (topic.startsWith(GIDPrefix("data/health")))
           DataController.instance.updateHealth(topic.split('/').last, double.tryParse(payload));
         // json: lat (float), lng (float)
-        else if (topic.startsWith("data/gps")) {
+        else if (topic.startsWith(GIDPrefix("data/gps"))) {
           try {
             Map<String, dynamic> data = jsonDecode(payload);
             DataController.instance.updateGps(

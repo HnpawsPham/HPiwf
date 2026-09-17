@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 // only and unchangable GID
 final String GID = const String.fromEnvironment("GID");
 
+String GIDPrefix(String topic) {
+  return "$GID/$topic";
+}
+
 // THEME CONFIG
 ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 
@@ -24,7 +28,7 @@ class AppTheme {
       surface: colorDarkBlue,
       onSurface: colorWhite,
       secondary: colorLightBlue,
-      tertiaryContainer: colorLightBlue
+      tertiaryContainer: colorLightBlue,
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Color.fromARGB(255, 210, 240, 255)),
@@ -43,7 +47,7 @@ class AppTheme {
       surface: Color(0xFFE1EFFB),
       onSurface: colorDarkBlue,
       secondary: colorWhite,
-      tertiaryContainer: colorBlack
+      tertiaryContainer: colorBlack,
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Color(0xFF0F1B26)),

@@ -1,5 +1,6 @@
 // control data routes to display UI
 import 'package:flutter/material.dart';
+import "../database/database.dart";
 
 class DataController extends ChangeNotifier {
   static final DataController instance = DataController._internal();
@@ -7,12 +8,25 @@ class DataController extends ChangeNotifier {
   DataController._internal();
 
   // SETTING VARIABLES
-  Map<String, bool> systemSetting = {
+  Map<String, bool> devicesSetting = {
     "USE_WRISTBAND": true,
     "USE_DOOR_DEVICE": true,
     "USE_KITCHEN_DEVICE": true,
-    "TAKE_OFF_ALERT": true,
     "USE_HOME_STATION": true,
+  };
+
+  Map<String, bool> appSetting = {
+    "ACCEPT_UPDATE_NOTIFICATIONS": true,
+    "ACCEPT_COMPLETION_NOTIFICATIONS": true,
+    "ACCEPT_ALERTS": true,
+  };
+
+  // CONNECTION INFO
+  Map<String, bool> connectionInfo = {
+    "home-station": false,
+    "kitchen-device": false,
+    "home-device": false,
+    "wristband": false,
   };
 
   // weather info
@@ -37,7 +51,7 @@ class DataController extends ChangeNotifier {
   };
 
   // HEALTH INFO
-  Map<String, dynamic> healthInfo = {"bpm": 86, "spo2": 0.9};
+  Map<String, dynamic> healthInfo = {"bpm": 0, "spo2": 0};
 
   // GPS INFO
   double? lat, lng;
@@ -73,8 +87,21 @@ class DataController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSetting(String key, bool val) {
-    systemSetting[key] = val;
+  // UPDATE SETTINGS
+  void updateDevicesSetting(String key, bool val) {
+    devicesSetting[key] = val;
+    FirebaseDB.updateData("setting", {key: val});
+    notifyListeners();
+  }
+
+  void updateAppSetting(String key, bool val) {
+    appSetting[key] = val;
+    notifyListeners();
+  }
+
+  // UPDATE DEVICES CONNECTION STATES
+  void updateConnectionState(String device, bool state) {
+    connectionInfo[device] = state;
     notifyListeners();
   }
 
@@ -93,5 +120,23 @@ class DataController extends ChangeNotifier {
     if (rain > 100) return "Heavy Rain";
     if (rain > 0) return "Light Rain";
     return "Dry";
+  }
+
+  // RESET ALL SETTING TO DEFAULT
+  void resetSystemSetting() {
+    devicesSetting = {
+      "USE_WRISTBAND": true,
+      "USE_DOOR_DEVICE": true,
+      "USE_KITCHEN_DEVICE": true,
+      "TAKE_OFF_ALERT": true,
+      "USE_HOME_STATION": true,
+    };
+
+    appSetting = {
+      "ACCEPT_UPDATE_NOTIFICATIONS": true,
+      "ACCEPT_COMPLETION_NOTIFICATIONS": true,
+      "ACCEPT_ALERTS": true,
+    };
+    notifyListeners();
   }
 }
