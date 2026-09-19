@@ -16,101 +16,108 @@ class ReminderTab extends StatefulWidget {
 class _ReminderTabState extends State<ReminderTab> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      child: Column(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
+    return ValueListenableBuilder(
+      valueListenable: FirebaseDB.chosenGID,
+      builder: (context, curGID, child) {
+        if (curGID.isEmpty) return Center(child: Text("You haven't joined a group!"));
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          child: Column(
             children: [
-              // bedtime section
-              bedtimeSection(),
-              Positioned(
-                top: 0,
-                left: 25,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: colorWhite,
-                  ),
-                  child: const Text(
-                    "Bedtime",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: colorBlack,
-                      fontFamily: "cubano",
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 50),
-
-          // medicine section
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              medicineSection(),
-
-              // title
-              Positioned(
-                top: 0,
-                left: 25,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: colorWhite,
-                  ),
-                  child: const Text(
-                    "Medicine",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: colorBlack,
-                      fontFamily: "cubano",
-                    ),
-                  ),
-                ),
-              ),
-
-              // add reminder btn
-              Positioned(
-                top: 0,
-                right: 25,
-                child: ElevatedButton(
-                  onPressed: () => _showInputPopup(context),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero,
-                    padding: EdgeInsets.all(0),
-                  ),
-
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: colorLightBlue,
-                    ),
-                    child: const Text(
-                      "+",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colorDarkBlue,
-                        fontFamily: "cubano",
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // bedtime section
+                  bedtimeSection(),
+                  Positioned(
+                    top: 0,
+                    left: 25,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: colorWhite,
+                      ),
+                      child: const Text(
+                        "Bedtime",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: colorBlack,
+                          fontFamily: "cubano",
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+
+              SizedBox(height: 50),
+
+              // medicine section
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  medicineSection(),
+
+                  // title
+                  Positioned(
+                    top: 0,
+                    left: 25,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: colorWhite,
+                      ),
+                      child: const Text(
+                        "Medicine",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: colorBlack,
+                          fontFamily: "cubano",
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // add reminder btn
+                  Positioned(
+                    top: 0,
+                    right: 25,
+                    child: ElevatedButton(
+                      onPressed: () => _showInputPopup(context),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
+                        padding: EdgeInsets.all(0),
+                      ),
+
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: colorLightBlue,
+                        ),
+                        child: const Text(
+                          "+",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: colorDarkBlue,
+                            fontFamily: "cubano",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -184,7 +191,7 @@ Widget medicineSection() {
             : Center(
                 child: Text(
                   "No medicine added.",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorWhite),
                 ),
               ),
       );
@@ -201,6 +208,8 @@ Widget bedtimeSection() {
   return StreamBuilder(
     stream: FirebaseDB.getDBStream("bedtime"),
     builder: (context, asyncSnapshot) {
+      if (FirebaseDB.chosenGID == "") return Center(child: Text("You haven't joined a group!"));
+
       if (asyncSnapshot.hasData && asyncSnapshot.data!.docs.isNotEmpty) {
         Map<String, dynamic> data = asyncSnapshot.data!.docs.first.data() as Map<String, dynamic>;
 

@@ -1,6 +1,7 @@
 import "package:firebase_auth/firebase_auth.dart";
 import 'package:flutter/material.dart';
 import "package:hpiwf/config.dart";
+import "package:hpiwf/database/database.dart";
 import "UI/homepage.dart";
 import "controllers/ml-controller.dart";
 import "controllers/mqtt-manager.dart";
@@ -21,6 +22,9 @@ void main() async {
   app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   auth = FirebaseAuth.instanceFor(app: app);
   await FBAuth.initGoogleSignIn();
+
+  // get current GID
+  FirebaseDB.initGIDListener(auth);
 
   runApp(const App());
 }

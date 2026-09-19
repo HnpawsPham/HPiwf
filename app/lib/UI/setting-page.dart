@@ -4,6 +4,10 @@ import 'package:hpiwf/controllers/data-controller.dart';
 import "../config.dart";
 import '../../database/authentication.dart';
 import 'package:spoiler_widget/spoiler_widget.dart';
+import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
+import "./login-page.dart";
+import 'package:stroke_text/stroke_text.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -13,6 +17,18 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+  bool _hidePass = true;
+
+  Future<void> _openURL(String urlStr) async {
+    final Uri url = Uri.parse(urlStr);
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -40,11 +56,12 @@ class _SettingPageState extends State<SettingPage> {
                     child: Column(
                       children: [
                         // APP INFO (GID AND INVITATIONS)
-                        _createHeader(context, "App info"),
+                        appInfo(context),
                         SizedBox(height: 10),
+
                         // ACCOUNT SETTING
-                        _createHeader(context, "My account"),
-                        SizedBox(height: 10),
+                        myAccount(context),
+                        SizedBox(height: 20),
 
                         // NOTIFICATIONS SETTING
                         _createHeader(context, "Notifications"),
@@ -129,6 +146,208 @@ class _SettingPageState extends State<SettingPage> {
           ),
         );
       },
+    );
+  }
+
+  Column myAccount(BuildContext context) {
+    return Column(
+      children: [
+        _createHeader(context, "My account"),
+        Center(
+          child: StreamBuilder(
+            stream: FBAuth.authStateChange,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+
+              if (snapshot.hasData)
+                return Column(
+                  children: [
+                    SizedBox(height: 10),
+                    Stack(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 230,
+                          margin: EdgeInsets.only(left: 25, right: 25, top: 80, bottom: 0),
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          decoration: BoxDecoration(
+                            color: colorDarkBlue,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 15,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              width: 150,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                                  width: 5,
+                                ),
+                                image: const DecorationImage(
+                                  image: AssetImage("assets/best-avt.jpg"),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          bottom: 70,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                            child: TextField(
+                              style: TextStyle(
+                                color: colorWhite,
+                                fontFamily: "cubano",
+                                fontSize: 20,
+                              ),
+                              textAlign: TextAlign.center,
+                              controller: _nameController,
+
+                              onTap: () async {
+                                String newName = _nameController.text.trim();
+                              },
+
+                              decoration: InputDecoration(
+                                labelText: "Username: ",
+                                labelStyle: TextStyle(color: colorBlack, fontFamily: "cubano"),
+                                hintText: "Name",
+                                hintStyle: TextStyle(color: colorBlack.withValues(alpha: 0.5)),
+                                filled: true,
+                                fillColor: colorWhite,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          bottom: 10,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                            child: TextField(
+                              style: TextStyle(
+                                color: colorBlack,
+                                fontFamily: "cubano",
+                                fontSize: 20,
+                              ),
+                              textAlign: TextAlign.center,
+                              controller: _passController,
+                              obscureText: _hidePass,
+
+                              onTap: () async {},
+                              decoration: InputDecoration(
+                                hintText: "123455",
+                                labelText: "Password: ",
+                                labelStyle: TextStyle(color: colorBlack, fontFamily: "cubano"),
+                                hintStyle: TextStyle(color: colorBlack.withValues(alpha: 0.5)),
+                                filled: true,
+                                fillColor: colorWhite,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _hidePass ? Icons.visibility_off : Icons.visibility,
+                                    color: colorBlack,
+                                  ),
+                                  onPressed: () => setState(() => _hidePass = !_hidePass),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              else
+                return Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column appInfo(BuildContext context) {
+    return Column(
+      children: [
+        _createHeader(context, "App info"),
+        SizedBox(height: 10),
+        Text(
+          "HPiwf Application",
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: "cubano"),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Text(
+            "An IoT system for the Elderly and Alzheimer's patients",
+            style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+          child: Row(
+            children: [
+              Text("Author: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text("Hnpaws Pham - PĐVT", style: TextStyle(fontSize: 20)),
+            ],
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Source: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _openURL("https://github.com/HnpawsPham/HPiwf"),
+                  child: Text(
+                    "github.com/HnpawsPham/HPiwf",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: colorLightBlue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
