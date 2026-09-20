@@ -71,5 +71,7 @@
 		<string>https</string>
 		<string>http</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow this app to browse your pictures for picking an avatar.</string>
 </dict>
 </plist>

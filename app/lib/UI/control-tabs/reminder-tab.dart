@@ -5,6 +5,7 @@ import "../../database/database.dart";
 import "../../controllers/notification-manager.dart";
 import 'package:stroke_text/stroke_text.dart';
 import 'package:intl/intl.dart';
+import "package:cloud_firestore/cloud_firestore.dart";
 
 class ReminderTab extends StatefulWidget {
   const ReminderTab({super.key});
@@ -13,6 +14,8 @@ class ReminderTab extends StatefulWidget {
   State<ReminderTab> createState() => _ReminderTabState();
 }
 
+Map<String, dynamic>? curUserData;
+
 class _ReminderTabState extends State<ReminderTab> {
   @override
   Widget build(BuildContext context) {
@@ -20,102 +23,126 @@ class _ReminderTabState extends State<ReminderTab> {
       valueListenable: FirebaseDB.chosenGID,
       builder: (context, curGID, child) {
         if (curGID.isEmpty) return Center(child: Text("You haven't joined a group!"));
+        return StreamBuilder(
+          stream: FBAuth.authStateChange,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting)
+              return const Center(child: CircularProgressIndicator());
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-          child: Column(
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // bedtime section
-                  bedtimeSection(),
-                  Positioned(
-                    top: 0,
-                    left: 25,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: colorWhite,
-                      ),
-                      child: const Text(
-                        "Bedtime",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: colorBlack,
-                          fontFamily: "cubano",
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            String curUID = snapshot.data!.uid;
 
-              SizedBox(height: 50),
+            return StreamBuilder<DocumentSnapshot?>(
+              stream: FirebaseDB.getUserDataStream(curUID),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting)
+                  return const Center(child: CircularProgressIndicator());
 
-              // medicine section
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  medicineSection(),
-
-                  // title
-                  Positioned(
-                    top: 0,
-                    left: 25,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: colorWhite,
-                      ),
-                      child: const Text(
-                        "Medicine",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: colorBlack,
-                          fontFamily: "cubano",
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // add reminder btn
-                  Positioned(
-                    top: 0,
-                    right: 25,
-                    child: ElevatedButton(
-                      onPressed: () => _showInputPopup(context),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size.zero,
-                        padding: EdgeInsets.all(0),
-                      ),
-
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: colorLightBlue,
-                        ),
-                        child: const Text(
-                          "+",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: colorDarkBlue,
-                            fontFamily: "cubano",
+                curUserData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  child: Column(
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          // bedtime section
+                          bedtimeSection(),
+                          Positioned(
+                            top: 0,
+                            left: 25,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: colorWhite,
+                              ),
+                              child: const Text(
+                                "Bedtime",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorBlack,
+                                  fontFamily: "cubano",
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
+
+                      SizedBox(height: 50),
+
+                      // medicine section
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          medicineSection(),
+
+                          // title
+                          Positioned(
+                            top: 0,
+                            left: 25,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: colorWhite,
+                              ),
+                              child: const Text(
+                                "Medicine",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorBlack,
+                                  fontFamily: "cubano",
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // add reminder btn
+                          Positioned(
+                            top: 0,
+                            right: 25,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (curUserData?["role"] == 0) {
+                                  notify(context, "You don't have permission to edit!", 5, 500);
+                                  return;
+                                }
+                                _showInputPopup(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size.zero,
+                                padding: EdgeInsets.all(0),
+                              ),
+
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: colorLightBlue,
+                                ),
+                                child: const Text(
+                                  "+",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorDarkBlue,
+                                    fontFamily: "cubano",
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
+                );
+              },
+            );
+          },
         );
       },
     );
@@ -242,6 +269,11 @@ Widget bedtimeSection() {
                     readOnly: true,
                     controller: _bedtimeController,
                     onTap: () async {
+                      if (curUserData?["role"] == 0) {
+                        notify(context, "You don't have permission to edit!", 5, 500);
+                        return;
+                      }
+
                       await _selectTime(context, _bedtimeController);
 
                       String wakeTime = _bedtimeController.text.trim();
@@ -286,6 +318,10 @@ Widget bedtimeSection() {
                     readOnly: true,
                     controller: _wakeTimeController,
                     onTap: () async {
+                      if (curUserData?["role"] == 0) {
+                        notify(context, "You don't have permission to edit!", 5, 500);
+                        return;
+                      }
                       await _selectTime(context, _wakeTimeController);
 
                       String wakeTime = _wakeTimeController.text.trim();
@@ -328,6 +364,11 @@ Widget bedtimeSection() {
                     textAlign: TextAlign.center,
                     controller: _bedtimeContentController,
                     onSubmitted: (val) {
+                      if (curUserData?["role"] == 0) {
+                        notify(context, "You don't have permission to edit!", 5, 500);
+                        return;
+                      }
+
                       String content = _bedtimeContentController.text.trim();
                       if (content.isNotEmpty) {
                         FirebaseDB.updateData("bedtime", {"content": content});

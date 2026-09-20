@@ -57,12 +57,21 @@ class FirebaseDB {
     await _GIDPrefix(collection).add(data);
   }
 
-  static void updateData(String collection, Map<String, dynamic> data) async {
-    await _GIDPrefix(collection).doc("info").set(data, SetOptions(merge: true));
+  static void addToList(String gid, String uid) async {
+    var docRef = FirebaseFirestore.instance.collection("GID").doc(gid);
+    var doc = await docRef.get();
+
+    List curList = doc.exists ? (doc.data()?["list"] ?? []) : [];
+
+    if (curList.isEmpty) FirebaseDB.updateUser(uid, {"role": 2});
+
+    await docRef.set({
+      "list": FieldValue.arrayUnion([uid]),
+    }, SetOptions(merge: true));
   }
 
-  static void addNewUser(String userID, Map<String, dynamic> userData) async {
-    await FirebaseFirestore.instance.doc(userID).set(userData, SetOptions(merge: true));
+  static void updateData(String collection, Map<String, dynamic> data) async {
+    await _GIDPrefix(collection).doc("info").set(data, SetOptions(merge: true));
   }
 
   static void updateUser(String userID, Map<String, dynamic> userData) async {
@@ -70,6 +79,14 @@ class FirebaseDB {
         .collection("users")
         .doc(userID)
         .set(userData, SetOptions(merge: true));
+  }
+
+  static Stream<List<DocumentSnapshot>> getUsersInGroupStream(String gid) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where('GID', isEqualTo: gid)
+        .snapshots()
+        .map((snapshot) => snapshot.docs);
   }
 
   static Stream<DocumentSnapshot?> getUserDataStream(String userID) {

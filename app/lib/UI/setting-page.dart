@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hpiwf/controllers/data-controller.dart';
+import 'package:hpiwf/controllers/notification-manager.dart';
 import "../config.dart";
 import '../../database/authentication.dart';
 import 'package:spoiler_widget/spoiler_widget.dart';
@@ -8,6 +9,11 @@ import 'package:url_launcher/link.dart';
 import 'package:url_launcher/url_launcher.dart';
 import "./login-page.dart";
 import 'package:stroke_text/stroke_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import "../database/database.dart";
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -21,12 +27,23 @@ class _SettingPageState extends State<SettingPage> {
   final TextEditingController _passController = TextEditingController();
   bool _hidePass = true;
 
+  File? _chosenAvt;
+  ImagePicker _imgPicker = ImagePicker();
+
   Future<void> _openURL(String urlStr) async {
     final Uri url = Uri.parse(urlStr);
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
+  }
+
+  Future<String?> pickAnImage() async {
+    final pickedImg = await _imgPicker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (pickedImg == null) return null;
+
+    final bytes = await File(pickedImg.path).readAsBytes();
+    return base64Encode(bytes);
   }
 
   @override
@@ -160,135 +177,260 @@ class _SettingPageState extends State<SettingPage> {
               if (snapshot.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());
 
-              if (snapshot.hasData)
-                return Column(
-                  children: [
-                    SizedBox(height: 10),
-                    Stack(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: 230,
-                          margin: EdgeInsets.only(left: 25, right: 25, top: 80, bottom: 0),
-                          padding: EdgeInsets.symmetric(vertical: 40),
-                          decoration: BoxDecoration(
-                            color: colorDarkBlue,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-
-                        Positioned(
-                          top: 15,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Container(
-                              width: 150,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.tertiaryContainer,
-                                  width: 5,
-                                ),
-                                image: const DecorationImage(
-                                  image: AssetImage("assets/best-avt.jpg"),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        Positioned(
-                          bottom: 70,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                            child: TextField(
-                              style: TextStyle(
-                                color: colorWhite,
-                                fontFamily: "cubano",
-                                fontSize: 20,
-                              ),
-                              textAlign: TextAlign.center,
-                              controller: _nameController,
-
-                              onTap: () async {
-                                String newName = _nameController.text.trim();
-                              },
-
-                              decoration: InputDecoration(
-                                labelText: "Username: ",
-                                labelStyle: TextStyle(color: colorBlack, fontFamily: "cubano"),
-                                hintText: "Name",
-                                hintStyle: TextStyle(color: colorBlack.withValues(alpha: 0.5)),
-                                filled: true,
-                                fillColor: colorWhite,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        Positioned(
-                          bottom: 10,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                            child: TextField(
-                              style: TextStyle(
-                                color: colorBlack,
-                                fontFamily: "cubano",
-                                fontSize: 20,
-                              ),
-                              textAlign: TextAlign.center,
-                              controller: _passController,
-                              obscureText: _hidePass,
-
-                              onTap: () async {},
-                              decoration: InputDecoration(
-                                hintText: "123455",
-                                labelText: "Password: ",
-                                labelStyle: TextStyle(color: colorBlack, fontFamily: "cubano"),
-                                hintStyle: TextStyle(color: colorBlack.withValues(alpha: 0.5)),
-                                filled: true,
-                                fillColor: colorWhite,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  borderSide: BorderSide.none,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _hidePass ? Icons.visibility_off : Icons.visibility,
-                                    color: colorBlack,
-                                  ),
-                                  onPressed: () => setState(() => _hidePass = !_hidePass),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              else
+              if (!snapshot.hasData) {
                 return Center(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(15),
+                    margin: const EdgeInsets.only(top: 10),
+                    child: const Text(
+                      "No user data found.",
+                      style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
                     ),
                   ),
                 );
+              }
+
+              String curUID = snapshot.data!.uid;
+
+              return StreamBuilder<DocumentSnapshot?>(
+                stream: FirebaseDB.getUserDataStream(curUID),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting)
+                    return const Center(child: CircularProgressIndicator());
+
+                  if (!userSnapshot.hasData || !userSnapshot.data!.exists)
+                    return const Center(child: Text("No user data found."));
+
+                  Map<String, dynamic>? curUserData =
+                      userSnapshot.data!.data() as Map<String, dynamic>?;
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      Stack(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 240,
+                            margin: const EdgeInsets.only(left: 25, right: 25, top: 80, bottom: 0),
+                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            decoration: BoxDecoration(
+                              color: colorDarkBlue,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          Positioned(
+                            top: 15,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    width: 150,
+                                    height: 150,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Theme.of(context).colorScheme.tertiaryContainer,
+                                        width: 5,
+                                      ),
+                                      image: DecorationImage(
+                                        image:
+                                            (curUserData?["avt"] != null &&
+                                                curUserData!["avt"].isNotEmpty)
+                                            ? MemoryImage(base64Decode(curUserData["avt"]))
+                                            : const AssetImage("assets/best-avt.jpg")
+                                                  as ImageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: IconButton.filled(
+                                      onPressed: () async {
+                                        String? base64 = await pickAnImage();
+
+                                        if (base64 != null)
+                                          FirebaseDB.updateUser(curUID, {"avt": base64});
+                                      },
+                                      icon: const Icon(Icons.camera_alt),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 80,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                              child: TextField(
+                                style: const TextStyle(
+                                  color: colorBlack,
+                                  fontFamily: "cubano",
+                                  fontSize: 20,
+                                ),
+                                textAlign: TextAlign.center,
+
+                                controller: _nameController,
+                                onSubmitted: (value) async {
+                                  String newName = _nameController.text.trim();
+
+                                  if (newName.isEmpty) {
+                                    notify(context, "New name is empty", 3, 500);
+                                    return;
+                                  } else if (newName == curUserData?["username"]) {
+                                    notify(context, "Name unchanged", 3, 0);
+                                    return;
+                                  }
+
+                                  FirebaseDB.updateUser(curUID, {"username": newName});
+                                  notify(context, "New name is set!", 3, 200);
+                                },
+
+                                decoration: InputDecoration(
+                                  label: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: colorLightBlue,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: colorBlack),
+                                    ),
+                                    child: const Text(
+                                      "Username:",
+                                      style: TextStyle(
+                                        color: colorBlack,
+                                        fontFamily: "cubano",
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  hintText: curUserData?["username"] ?? "Not set",
+                                  hintStyle: TextStyle(color: colorBlack.withValues(alpha: 0.5)),
+                                  filled: true,
+                                  fillColor: colorWhite,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          ((curUserData?["login-method"] ?? "google") == "email")
+                              ? Positioned(
+                                  bottom: 10,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 50,
+                                      vertical: 10,
+                                    ),
+                                    child: StatefulBuilder(
+                                      builder: (context, setLocalState) {
+                                        return TextField(
+                                          style: const TextStyle(
+                                            color: colorBlack,
+                                            fontFamily: "cubano",
+                                            fontSize: 20,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          controller: _passController,
+                                          obscureText: _hidePass,
+
+                                          onSubmitted: (_) async {
+                                            String newPass = _passController.text.trim();
+
+                                            if (newPass.isEmpty) {
+                                              notify(context, "New password is empty.", 3, 500);
+                                              return;
+                                            } else if (newPass == curUserData?["pass"]) {
+                                              notify(context, "Password unchanged", 3, 0);
+                                              return;
+                                            }
+
+                                            FirebaseDB.updateUser(curUID, {"pass": newPass});
+                                            notify(context, "New password is set", 3, 200);
+                                          },
+
+                                          decoration: InputDecoration(
+                                            label: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: colorLightBlue,
+                                                borderRadius: BorderRadius.circular(15),
+                                                border: Border.all(color: colorBlack),
+                                              ),
+                                              child: const Text(
+                                                "Password:",
+                                                style: TextStyle(
+                                                  color: colorBlack,
+                                                  fontFamily: "cubano",
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ),
+                                            hintText: curUserData?["pass"],
+                                            hintStyle: TextStyle(
+                                              color: colorBlack.withValues(alpha: 0.5),
+                                            ),
+                                            filled: true,
+                                            fillColor: colorWhite,
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 5,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(20),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _hidePass ? Icons.visibility_off : Icons.visibility,
+                                                color: colorBlack,
+                                              ),
+                                              onPressed: () =>
+                                                  setLocalState(() => _hidePass = !_hidePass),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                )
+                              : Positioned(
+                                  bottom: 30,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: Text(
+                                      "This account is linked with Google.",
+                                      style: TextStyle(fontSize: 20),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
         ),

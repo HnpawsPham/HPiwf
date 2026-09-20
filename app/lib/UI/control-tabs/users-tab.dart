@@ -6,6 +6,9 @@ import 'package:hpiwf/config.dart';
 import "../login-page.dart";
 import 'package:stroke_text/stroke_text.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'dart:convert';
+
+const roleMap = ["View", "Editor", "Admin"];
 
 class UsersTab extends StatefulWidget {
   const UsersTab({super.key});
@@ -35,9 +38,6 @@ class _UsersTabState extends State<UsersTab> {
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());
-
-              if (!userSnapshot.hasData || userSnapshot.data == null || !userSnapshot.data!.exists)
-                return const Center(child: Text("User data not found!"));
 
               Map<String, dynamic>? curUserData =
                   userSnapshot.data!.data() as Map<String, dynamic>?;
@@ -74,7 +74,9 @@ class _UsersTabState extends State<UsersTab> {
                                 width: 5,
                               ),
                               image: DecorationImage(
-                                image: AssetImage(curUserData?["avt"] ?? "assets/best-avt.jpg"),
+                                image: curUserData?["avt"] != null
+                                    ? MemoryImage(base64Decode(curUserData!["avt"]))
+                                    : AssetImage("assets/best-avt.jpg"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -100,155 +102,203 @@ class _UsersTabState extends State<UsersTab> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Stack(
-                            children: [
-                              Transform.translate(
-                                offset: const Offset(0, 3),
-                                child: Opacity(
-                                  opacity: 0.5,
-                                  child: ColorFiltered(
-                                    colorFilter: const ColorFilter.mode(
-                                      Colors.black,
-                                      BlendMode.srcIn,
+
+                      ((curUserData?["role"] ?? 0) == 2)
+                          ? Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Stack(
+                                  children: [
+                                    Transform.translate(
+                                      offset: const Offset(0, 3),
+                                      child: Opacity(
+                                        opacity: 0.5,
+                                        child: ColorFiltered(
+                                          colorFilter: const ColorFilter.mode(
+                                            Colors.black,
+                                            BlendMode.srcIn,
+                                          ),
+                                          child: Image.asset(
+                                            "assets/key-icon.png",
+                                            width: 45,
+                                            height: 45,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    child: Image.asset(
-                                      "assets/key-icon.png",
-                                      width: 45,
-                                      height: 45,
-                                    ),
+                                    Image.asset("assets/key-icon.png", width: 40, height: 40),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  "You",
+                                  style: TextStyle(
+                                    fontFamily: "cubano",
+                                    fontSize: 20,
+                                    color: Theme.of(context).colorScheme.onTertiaryContainer,
                                   ),
                                 ),
                               ),
-                              Image.asset("assets/key-icon.png", width: 40, height: 40),
-                            ],
-                          ),
-                        ),
-                      ),
+                            ),
                     ],
                   ),
 
                   const SizedBox(height: 10),
 
-                  // Phần hiển thị danh sách dùng ValueListenableBuilder
                   Expanded(
                     child: ValueListenableBuilder<String>(
                       valueListenable: FirebaseDB.chosenGID,
                       builder: (context, curGID, child) {
-                        if (curGID.isNotEmpty) {
-                          return SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      width: double.infinity,
-                                      margin: const EdgeInsets.all(23),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                        color: colorDarkBlue,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            margin: const EdgeInsets.only(left: 80),
-                                            padding: const EdgeInsets.symmetric(vertical: 10),
-                                            child: const Text(
-                                              "Name here",
-                                              style: TextStyle(
-                                                fontFamily: "cubano",
-                                                color: colorWhite,
-                                                fontSize: 20,
+                        if (curGID.isEmpty)
+                          return const Center(child: Text("You haven't joined a group!"));
+
+                        return SingleChildScrollView(
+                          child: StreamBuilder<List<DocumentSnapshot>>(
+                            stream: FirebaseDB.getUsersInGroupStream(curGID),
+                            builder: (context, usersSnapshot) {
+                              if (usersSnapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(child: CircularProgressIndicator());
+                              }
+
+                              final users =
+                                  usersSnapshot.data?.where((doc) => doc.id != curUID).toList() ??
+                                  [];
+
+                              if (usersSnapshot.hasError || users.isEmpty) {
+                                return const Center(
+                                  child: Text("You are alone.", style: TextStyle(fontSize: 20)),
+                                );
+                              }
+
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: users.length,
+                                itemBuilder: (context, id) {
+                                  final userData = users[id].data() as Map<String, dynamic>;
+
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        margin: const EdgeInsets.all(23),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(15),
+                                          color: colorDarkBlue,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              margin: const EdgeInsets.only(left: 80),
+                                              padding: const EdgeInsets.symmetric(vertical: 10),
+                                              child: Text(
+                                                userData["username"] ?? "Unknown",
+                                                style: TextStyle(
+                                                  fontFamily: "cubano",
+                                                  color: colorWhite,
+                                                  fontSize: 20,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Container(
-                                            width: 90,
-                                            height: 35,
-                                            margin: const EdgeInsets.only(right: 8),
-                                            decoration: BoxDecoration(
-                                              color: colorWhite,
-                                              borderRadius: BorderRadius.circular(15),
-                                            ),
-                                            child: DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                value: "View",
-                                                isExpanded: true,
-                                                alignment: Alignment.center,
-                                                dropdownColor: colorWhite,
-                                                icon: const Icon(
-                                                  Icons.arrow_drop_down,
-                                                  color: colorBlack,
-                                                ),
-                                                elevation: 16,
+                                            Container(
+                                              width: 90,
+                                              height: 35,
+                                              margin: const EdgeInsets.only(right: 8),
+                                              decoration: BoxDecoration(
+                                                color: colorWhite,
                                                 borderRadius: BorderRadius.circular(15),
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                ),
-                                                items: <String>["View", "Editor", "Admin"]
-                                                    .map(
-                                                      (val) => DropdownMenuItem(
-                                                        value: val,
-                                                        child: Align(
-                                                          alignment: Alignment.center,
-                                                          child: Text(
-                                                            val,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: const TextStyle(
-                                                              color: colorBlack,
+                                              ),
+                                              child: DropdownButtonHideUnderline(
+                                                child: DropdownButton<String>(
+                                                  value: roleMap[userData["role"] ?? 0],
+                                                  isExpanded: true,
+                                                  alignment: Alignment.center,
+                                                  dropdownColor: colorWhite,
+                                                  icon: const Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color: colorBlack,
+                                                  ),
+                                                  elevation: 16,
+                                                  borderRadius: BorderRadius.circular(15),
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                  items: <String>["View", "Editor", "Admin"]
+                                                      .map(
+                                                        (val) => DropdownMenuItem(
+                                                          value: val,
+                                                          child: Align(
+                                                            alignment: Alignment.center,
+                                                            child: Text(
+                                                              val,
+                                                              overflow: TextOverflow.ellipsis,
+                                                              style: const TextStyle(
+                                                                color: colorBlack,
+                                                              ),
+                                                              textAlign: TextAlign.center,
                                                             ),
-                                                            textAlign: TextAlign.center,
                                                           ),
                                                         ),
-                                                      ),
-                                                    )
-                                                    .toList(),
-                                                onChanged: (_) {},
+                                                      )
+                                                      .toList(),
+                                                  onChanged: (curUserData?["role"] == 2)
+                                                      ? (newRole) {
+                                                          if (newRole == null) return;
+                                                          FirebaseDB.updateUser(users[id].id, {
+                                                            "role": roleMap.indexOf(newRole),
+                                                          });
+                                                        }
+                                                      : null,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      left: 20,
-                                      bottom: 0,
-                                      child: Center(
-                                        child: Container(
-                                          width: 70,
-                                          height: 70,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.tertiaryContainer,
-                                              width: 5,
-                                            ),
-                                            image: const DecorationImage(
-                                              image: AssetImage("assets/best-avt.jpg"),
-                                              fit: BoxFit.cover,
+                                      Positioned(
+                                        top: 0,
+                                        left: 20,
+                                        bottom: 0,
+                                        child: Center(
+                                          child: Container(
+                                            width: 70,
+                                            height: 70,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.tertiaryContainer,
+                                                width: 5,
+                                              ),
+                                              image: DecorationImage(
+                                                image: userData["avt"] != null
+                                                    ? MemoryImage(base64Decode(userData["avt"]))
+                                                    : AssetImage("assets/best-avt.jpg"),
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        return const Center(child: Text("You haven't joined a group!"));
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -273,7 +323,9 @@ class _UsersTabState extends State<UsersTab> {
 
                         notify(context, "Valid GID", 3, 200);
                         FirebaseDB.updateUser(curUID, {"GID": pastedGID});
+                        FirebaseDB.addToList(pastedGID, curUID);
                       },
+
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,

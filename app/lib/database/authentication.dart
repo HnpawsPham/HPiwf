@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import "../controllers/notification-manager.dart";
+import "database.dart";
 
 class FBAuth {
   static final FBAuth _instance = FBAuth._internal();
@@ -13,6 +14,10 @@ class FBAuth {
         email: email,
         password: pass,
       );
+
+      String? uid = credential.user?.uid;
+      if (uid != null) FirebaseDB.updateUser(uid, {"login-method": "email", "pass": pass});
+
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') return "The account already exists for that email.";

@@ -50,6 +50,7 @@ dependencies:
   drop_shadow: ^0.1.0
   spoiler_widget: ^1.0.25
   url_launcher: ^6.3.2
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:
