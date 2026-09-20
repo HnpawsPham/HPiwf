@@ -37,7 +37,11 @@ class _LocationPageState extends State<LocationPage> {
           DataController().lng ?? -0.128928,
         );
 
-        if (_mapLoaded) _mapController.move(curPos, _mapController.camera.zoom);
+        if (_mapLoaded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapController.move(curPos, _mapController.camera.zoom);
+          });
+        }
 
         return Stack(
           children: [
@@ -48,9 +52,9 @@ class _LocationPageState extends State<LocationPage> {
               right: 0,
               child: ShaderMask(
                 shaderCallback: (Rect bounds) {
-                  return LinearGradient(
-                    begin: AlignmentGeometry.topCenter,
-                    end: AlignmentGeometry.bottomCenter,
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent],
                     stops: [0, 0.15, 0.85, 1],
                   ).createShader(bounds);
@@ -63,20 +67,20 @@ class _LocationPageState extends State<LocationPage> {
                     initialZoom: 16,
                     onMapReady: () {
                       _mapLoaded = true;
-                      _mapController.move(curPos, 16);
                     },
                     interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
                       userAgentPackageName: 'com.example.hpiwf',
                     ),
                     MarkerLayer(
                       markers: [
                         Marker(
                           point: curPos,
-                          child: Icon(Icons.location_on, color: Colors.red, size: 50),
+                          child: const Icon(Icons.location_on, color: Colors.red, size: 50),
                         ),
                       ],
                     ),
@@ -132,8 +136,7 @@ class _LocationPageState extends State<LocationPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(height: 10),
-
+                  const SizedBox(height: 10),
                   FloatingActionButton(
                     onPressed: _zoomOut,
                     heroTag: "zoom_out",

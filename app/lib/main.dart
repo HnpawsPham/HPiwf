@@ -8,6 +8,7 @@ import "controllers/mqtt-manager.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:hpiwf/firebase_options.dart";
 import "./database/authentication.dart";
+import "controllers/notification-manager.dart";
 
 late final FirebaseApp app;
 late final FirebaseAuth auth;
@@ -17,6 +18,7 @@ void main() async {
 
   await MLController.init();
   await startMQTT();
+  await LocalNoticeService.init();
 
   // initialize firebase
   app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

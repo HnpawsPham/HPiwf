@@ -1,7 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
 
-// only and unchangable GID
+// only and unchangable GID (fix later)
 final String GID = const String.fromEnvironment("GID");
 
 String GIDPrefix(String topic) {

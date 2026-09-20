@@ -4,6 +4,7 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import "data-controller.dart";
 import 'dart:convert';
 import "../config.dart";
+import "notification-manager.dart";
 
 final String MQTT_USERNAME = const String.fromEnvironment("MQTT_USERNAME");
 final String MQTT_SERVER = const String.fromEnvironment("MQTT_SERVER");
@@ -88,6 +89,7 @@ class MQTTManager {
         if (topic == GIDPrefix("data/health/fall")) {
           DataController.instance.setFall(true);
           print("fall detected");
+          LocalNoticeService.showNotification(title: "WARNING!", body: "Fall detect");
         }
         // notify when lost (geofencing upcoming)
         else if (topic == GIDPrefix("data/gps/lost"))

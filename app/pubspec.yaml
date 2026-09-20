@@ -51,6 +51,7 @@ dependencies:
   spoiler_widget: ^1.0.25
   url_launcher: ^6.3.2
   image_picker: ^1.2.3
+  flutter_local_notifications: ^22.3.1
 
 dev_dependencies:
   flutter_test:

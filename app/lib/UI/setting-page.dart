@@ -177,18 +177,6 @@ class _SettingPageState extends State<SettingPage> {
               if (snapshot.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());
 
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10),
-                    child: const Text(
-                      "No user data found.",
-                      style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
-                    ),
-                  ),
-                );
-              }
-
               String curUID = snapshot.data!.uid;
 
               return StreamBuilder<DocumentSnapshot?>(
@@ -196,9 +184,6 @@ class _SettingPageState extends State<SettingPage> {
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting)
                     return const Center(child: CircularProgressIndicator());
-
-                  if (!userSnapshot.hasData || !userSnapshot.data!.exists)
-                    return const Center(child: Text("No user data found."));
 
                   Map<String, dynamic>? curUserData =
                       userSnapshot.data!.data() as Map<String, dynamic>?;

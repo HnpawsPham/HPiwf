@@ -30,25 +30,25 @@ class DataController extends ChangeNotifier {
   };
 
   // weather info
-  // Map<String, dynamic> weatherInfo = {
-  //   "precipitation": null,
-  //   "humid": null,
-  //   "air-pressure": null,
-  //   "rain-val": null,
-  //   "temp": null,
-  //   "air-ppm": null,
-  //   "noise-delta": null,
-  // };
-
   Map<String, dynamic> weatherInfo = {
-    "precipitation": 1009,
-    "humid": 0.7,
-    "air-pressure": 1024,
-    "rain-val": 0,
-    "temp": 31,
-    "air-ppm": 234,
-    "noise-delta": 10,
+    "precipitation": null,
+    "humid": null,
+    "air-pressure": null,
+    "rain-val": null,
+    "temp": null,
+    "air-ppm": null,
+    "noise-delta": null,
   };
+
+  // Map<String, dynamic> weatherInfo = {
+  //   "precipitation": 1009,
+  //   "humid": 0.7,
+  //   "air-pressure": 1024,
+  //   "rain-val": 0,
+  //   "temp": 31,
+  //   "air-ppm": 234,
+  //   "noise-delta": 10,
+  // };
 
   // HEALTH INFO
   Map<String, dynamic> healthInfo = {"bpm": 0, "spo2": 0};
