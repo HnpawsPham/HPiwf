@@ -2,7 +2,6 @@
 #include <TinyGPS++.h>
 #include <mqtt-manager.h>
 #include <config.h>
-#include <helper.h>
 
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(gpsHS);
@@ -35,8 +34,8 @@ void loopGPS(){
                 // try not to spam
                 if(millis() - prevTime > waitTime){
                     prevTime = millis();
-                    publish(GIDPrefix("data/gps/lat"), String(lat, 6).c_str());
-                    publish(GIDPrefix("data/gps/lng"), String(lng, 6).c_str());
+                    publish("data/gps/lat", String(lat, 6).c_str());
+                    publish("data/gps/lng", String(lng, 6).c_str());
                 }
             }
         }

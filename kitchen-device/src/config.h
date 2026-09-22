@@ -9,5 +9,5 @@ const int flamePin = 1;
 
 // threshold (default)
 inline int flameThreshold = 100;
-inline int gasThreshold = 400;
+inline int gasThreshold = 100;
 #endif

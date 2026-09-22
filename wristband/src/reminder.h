@@ -1,10 +1,12 @@
-#ifndef SPEAKER_H
-#define SPEAKER_H
+#ifndef REMINDER_H
+#define REMINDER_H
 
 #include <Audio.h>
 extern Audio speaker;
 
 
 void initSpeaker();
+void initNTP();
+void loopNTP();
 
 #endif

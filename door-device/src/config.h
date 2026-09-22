@@ -11,4 +11,6 @@ const int buzzerPin = 10;
 const int rxPin = 2;
 const int txPin = 3;
 
+// thresholds
+inline int limMin = 5, limMax = 20;
 #endif

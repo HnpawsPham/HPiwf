@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 // only and unchangable GID
 final String GID = const String.fromEnvironment("GID");

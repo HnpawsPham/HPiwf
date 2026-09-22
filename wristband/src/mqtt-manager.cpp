@@ -4,33 +4,25 @@
 #include <config.h>
 #include <PubSubClient.h>
 #include <internet-manager.h>
-#include <speaker.h>
+#include <reminder.h>
 #include <helper.h>
 
 // mqtt communication
 void callback(const char* topic, const byte* payload, unsigned int len){
     if(strstr(topic, "data/reminder") != nullptr){
         String mess = String((char*)(payload)).substring(0, len);
-        Serial.write(payload, len);
 
-        if(CONNECTION_MODE == 0){
-            speaker.connecttospeech(mess.c_str(), "vi");
-            return;
-        }
-
-        // check if google text to speech is ok
-        if(downloadTTS(mess)) 
-            speaker.connecttoFS(LittleFS, "/tmp.mp3");
-        else Serial.println("voice failed");
+        speaker.connecttospeech(mess.c_str(), "vi");
+        return;
     }
 }
 
 void publish(const char* topic, const char* payload){
-    client.publish(topic, payload);
+    client.publish(GIDPrefix(topic), payload);
 }
 
 void subscribe(const char* topic){
-    client.subscribe(topic);
+    client.subscribe(GIDPrefix(topic));
 }
 
 void connectMQTT(){
@@ -39,6 +31,7 @@ void connectMQTT(){
         Serial.println("Connected to broker");
         client.subscribe(GIDPrefix("data/setting"));
         client.subscribe(GIDPrefix("data/reminder"));
+        client.publish("data", "esp32 hello");
     }
     else delay(1000);
 }

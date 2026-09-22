@@ -2,8 +2,7 @@
 #define BLUETOOTH_MANAGER_H
 
 void initBT();
-void getData(const char* senderName);
-void sendData(const char* receiverName, const char* val);
 void loopBT();
+bool sendData(const char* receiverName, const char* val);
 
 #endif

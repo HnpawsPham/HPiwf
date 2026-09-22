@@ -19,4 +19,9 @@ inline const int dhtPin = 18;
 inline const int rainPin = 35;
 inline const int airQualityPin = 33;
 inline const int noisePin = 34;
+inline const int bmpSDA = 25;
+inline const int bmpSCL = 26;
+inline const int btRX = 16;
+inline const int btTX = 17; 
+inline const int statePin = 4;
 #endif

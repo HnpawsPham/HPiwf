@@ -1,5 +1,6 @@
 #include <config.h>
 #include <Arduino.h>
+#include <preference.h>
 #include <SoftwareSerial.h>
 
 SoftwareSerial bluetooth(rxPin, txPin);
@@ -15,8 +16,20 @@ void sendSignal(String data){
 
 void loopBT(){
     if(bluetooth.available()){
-        String data = bluetooth.readStringUntil('\n');
-        Serial.println(data);
+        String data = bluetooth.readStringUntil(':');
+        if(data == "door") {
+            limMin = bluetooth.parseInt();
+            limMax = bluetooth.parseInt();
+
+            Serial.print("Min: ");
+            Serial.print(limMin);
+            Serial.print(" ; Max: ");
+            Serial.println(limMax);
+
+            sendSignal("received door setting");
+            saveLimMin(limMin);
+            saveLimMax(limMax);
+        }
     }
 
     if(Serial.available())

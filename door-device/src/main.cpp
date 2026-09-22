@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <config.h>
 #include <bluetooth-manager.h>
+#include <preference.h>
 
 void setup() {
     Serial.begin(9600);
@@ -11,10 +12,10 @@ void setup() {
     pinMode(echoPin, INPUT);
 
     initBT();
+    loadPref();
 }
 
 unsigned long prevTime = 0;
-int limMin = 5, limMax = 20;
 bool detected = 0;
 
 void checkObstacle() {
@@ -34,7 +35,7 @@ void checkObstacle() {
             lastSend = millis();
 
             Serial.println("Obstacle detect");
-            sendSignal("obstacle detected");
+            sendSignal("obstacle");
         }
         detected = 1;
     }
@@ -48,7 +49,7 @@ void checkVibration() {
             lastSend = millis();
 
             Serial.println("Vibration detect");
-            sendSignal("vibration detected");
+            sendSignal("vibration");
         }
         detected = 1;
     }
