@@ -8,7 +8,6 @@
 #include <helper.h>
 
 Audio speaker;
-Preferences pref;
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 7 * 3600);
@@ -17,16 +16,20 @@ String reminderList = "";
 String bedtimeList = "";
 void initSpeaker(){
     speaker.setPinout(blckPin, lrcPin, dinPin);
-    speaker.setVolume(17);
+    speaker.setVolume(21);
 }
 
 void initNTP(){
     timeClient.begin();
 
-    pref.begin("reminder", true);
-    pref.begin("bedtime", true);
-    reminderList = pref.getString("reminderList", "");
-    bedtimeList = pref.getString("bedtimeList", "");
+    pref.begin("reminder");
+    if(pref.isKey("reminderList")) 
+        reminderList = pref.getString("reminderList", "");
+    pref.end();
+
+    pref.begin("bedtime");
+    if(pref.isKey("bedtimeList")) 
+        bedtimeList = pref.getString("bedtimeList", "");
     pref.end();
 }
 
@@ -74,6 +77,7 @@ void loopNTP(){
     if(!bedtimeList.isEmpty()){
         remindBedtime(time);
         publish(GIDPrefix("data/notification"), "Bedtime reminder was sent");
+    }
     
     if(!reminderList.isEmpty())
         remindDrinkMed(time);

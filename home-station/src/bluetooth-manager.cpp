@@ -8,8 +8,10 @@ HardwareSerial hc05(2); //additional bluetooth module
 
 uint8_t doorDeviceMac[6] = {0x00, 0x23, 0x10, 0xA0, 0x2A, 0x47};
 unsigned long lastConnectDoor = 0;
-bool doorConnected = 0;
-const unsigned long RECONNECT_DOOR_WAITTIME = 5000; 
+const unsigned long RECONNECT_WAITTIME = 5000; 
+
+bool doorConnected = 0, kitchenConnected = 0;
+bool lastKitchenStatus = 0;
 
 void connectDoor(){
     if(!doorConnected){
@@ -64,7 +66,7 @@ bool sendData(const char* receiverName, const char* val){
 }
 
 void loopBT(){
-    if(!bluetooth.connected() && millis() - lastConnectDoor > RECONNECT_DOOR_WAITTIME){
+    if(!bluetooth.connected() && millis() - lastConnectDoor > RECONNECT_WAITTIME){
         lastConnectDoor = millis();
         connectDoor();
     }
@@ -83,13 +85,15 @@ void loopBT(){
         }
     }
 
+    kitchenConnected = digitalRead(statePin);
+    if(kitchenConnected != lastKitchenStatus){
+        publish("data/status/kitchen-device", kitchenConnected ? "online" : "offline");
+        lastKitchenStatus = kitchenConnected;
+    }
+    if(!kitchenConnected) return;
+
     while(Serial.available())
         hc05.write(Serial.read());
-
-    if(!digitalRead(statePin)){
-        publish("data/status/kitchen-device", "online");
-        return;
-    }
 
     if(hc05.available()){
         String data = hc05.readStringUntil('\n');

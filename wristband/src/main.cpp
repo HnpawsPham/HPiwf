@@ -26,6 +26,10 @@ void setup(){
 
     delay(1000);
     initNTP();
+
+    pref.begin("take-off-alert");
+    TAKE_OFF_ALERT = pref.getBool("take-off-alert", 1);
+    pref.end();
 }
 
 unsigned long prevTime = 0;

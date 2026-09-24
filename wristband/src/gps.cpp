@@ -15,28 +15,28 @@ const int waitTime = 500;
 void loopGPS(){
     static unsigned long prevTime = 0;
 
-    // while(gpsSerial.available() > 0){
-    //     char c = gpsSerial.read();
-    //     Serial.write(c);       
-    //     gps.encode(c);
-    // }
+    while(gpsSerial.available() > 0){
+        char c = gpsSerial.read();
+        Serial.write(c);       
+        gps.encode(c);
+    }
 
-    while(gpsSerial.available() > 0)
-        if(gps.encode(gpsSerial.read())){
-            if(gps.location.isValid()){
-                double lat = gps.location.lat();
-                double lng = gps.location.lng();
+    // while(gpsSerial.available() > 0)
+    //     if(gps.encode(gpsSerial.read())){
+    //         if(gps.location.isValid()){
+    //             double lat = gps.location.lat();
+    //             double lng = gps.location.lng();
 
-                Serial.print(lat, 6);
-                Serial.print(' ');
-                Serial.println(lng, 6);
+    //             Serial.print(lat, 6);
+    //             Serial.print(' ');
+    //             Serial.println(lng, 6);
 
-                // try not to spam
-                if(millis() - prevTime > waitTime){
-                    prevTime = millis();
-                    publish("data/gps/lat", String(lat, 6).c_str());
-                    publish("data/gps/lng", String(lng, 6).c_str());
-                }
-            }
-        }
+    //             // try not to spam
+    //             if(millis() - prevTime > waitTime){
+    //                 prevTime = millis();
+    //                 publish("data/gps/lat", String(lat, 6).c_str());
+    //                 publish("data/gps/lng", String(lng, 6).c_str());
+    //             }
+    //         }
+    //     }
 }

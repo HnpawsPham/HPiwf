@@ -2,8 +2,12 @@
 #define CONFIG_H
 
 #include <secrets.h>
+#include <Preferences.h>
 
-inline const char* wristbandName = "HPiwf-wristband283947";
+inline Preferences pref;
+inline bool TAKE_OFF_ALERT = 1;
+
+inline const char* const wristbandName = "HPiwf-wristband283947";
 
 // pinouts
 inline const int blckPin = 27;
@@ -24,7 +28,7 @@ inline const int gpsHS = 1;
 inline const int simHS = 2;
 
 // 5G
-inline const char* apns[] = {
+inline const char* const apns[] = {
     "v-internet", // Viettel, Vietnamobile, iTel
     "m-wap",      // MobiFone
     "m3-world",   // Vinaphone, Wintel
