@@ -416,7 +416,7 @@ Future<void> _selectTime(BuildContext context, TextEditingController controller)
     final dt = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
 
     // from 0-23 to AM PM
-    final formattedTime = DateFormat('h:mm a').format(dt);
+    final formattedTime = DateFormat('hh:mm').format(dt);
     controller.text = formattedTime;
   }
 }

@@ -165,6 +165,7 @@ class DashboardPageState extends State<DashboardPage> with SingleTickerProviderS
           );
           _heartAnimController.repeat(reverse: true);
         }
+
         return Column(
           children: [
             Text(

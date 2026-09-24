@@ -6,9 +6,11 @@
 
 void setup(){
     Serial.begin(115200);
+    
     connectWifi();
-    initBT();
+    delay(1000);
     initSensors();
+    initBT();
 }
 
 unsigned long prevTime = 0;

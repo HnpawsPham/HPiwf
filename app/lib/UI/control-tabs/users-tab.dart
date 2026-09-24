@@ -7,6 +7,7 @@ import "../login-page.dart";
 import 'package:stroke_text/stroke_text.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'dart:convert';
+import 'package:hpiwf/controllers/mqtt-manager.dart';
 
 const roleMap = ["View", "Editor", "Admin"];
 
@@ -40,7 +41,7 @@ class _UsersTabState extends State<UsersTab> {
                 return const Center(child: CircularProgressIndicator());
 
               Map<String, dynamic>? curUserData =
-                  userSnapshot.data!.data() as Map<String, dynamic>?;
+                  userSnapshot.data?.data() as Map<String, dynamic>?;
 
               return Column(
                 children: [
@@ -316,7 +317,7 @@ class _UsersTabState extends State<UsersTab> {
                       onSubmitted: (value) {
                         String pastedGID = _GIDController.text.trim();
 
-                        if (pastedGID.isEmpty || pastedGID.length != 17) {
+                        if (pastedGID.isEmpty || pastedGID.length != 16) {
                           notify(context, "GID is invalid", 3, 500);
                           return;
                         }
@@ -324,6 +325,8 @@ class _UsersTabState extends State<UsersTab> {
                         notify(context, "Valid GID", 3, 200);
                         FirebaseDB.updateUser(curUID, {"GID": pastedGID});
                         FirebaseDB.addToList(pastedGID, curUID);
+
+                        MQTTManager().sub("$pastedGID/data/#");
                       },
 
                       style: TextStyle(

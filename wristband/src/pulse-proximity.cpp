@@ -4,7 +4,7 @@
 #include <mqtt-manager.h>
 #include <spo2_algorithm.h>
 #include <config.h>
-#include <helper.h>
+#include <Preferences.h>
 
 MAX30105 heartSensor;
 
@@ -58,7 +58,7 @@ void handleSPO2(){
             if(validSPO2){
                 Serial.print("SPO2: ");
                 Serial.println(SPO2);
-                publish(GIDPrefix("data/health/spo2"), String(SPO2).c_str());
+                publish("data/health/spo2", String(SPO2).c_str());
             }
             i = 0;
         }
@@ -78,6 +78,7 @@ void initHeartSensor(){
 
 const int duration = 30000;
 int MODE = 0; //0: heartbeat, 1: sleep, 2: spo2, 3: sleep
+bool started = 1;
 
 void loopHeartSensor(){
     static unsigned long prevTime = 0;
@@ -91,7 +92,14 @@ void loopHeartSensor(){
             Serial.print("BPM: ");
             Serial.println(beatCnt);
 
-            publish(GIDPrefix("data/health/bpm"), String(beatCnt).c_str());
+            publish("data/health/bpm", String(beatCnt).c_str());
+
+            // take off alert
+            if(TAKE_OFF_ALERT && beatCnt <= 10 && started) 
+                Serial.println("take off wristband detect");
+            publish("data/health/take-off", "1");
+
+            started = 0;
             setupSleep();
         }
         else if(MODE == 1)

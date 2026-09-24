@@ -61,8 +61,8 @@ class MQTTManager {
 
   void sub(String topic) {
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      client.subscribe(GIDPrefix(topic), QosMap[topic] ?? MqttQos.atMostOnce);
-      print("subscribed to $topic");
+      client.subscribe(topic, QosMap[topic] ?? MqttQos.atMostOnce);
+      print("subscribed to ${topic}");
     }
   }
 
@@ -85,28 +85,41 @@ class MQTTManager {
       if (payload.isEmpty) return;
 
       try {
+        int dataPos = topic.indexOf("data/");
+        String subTopic = dataPos != -1 ? topic.substring(dataPos) : "";
+
         // notify when fall
-        if (topic == GIDPrefix("data/health/fall")) {
+        if (subTopic == "data/health/fall") {
           DataController.instance.setFall(true);
           print("fall detected");
           LocalNoticeService.showNotification(title: "WARNING!", body: "Fall detect");
         }
         // notify when lost (geofencing upcoming)
-        else if (topic == GIDPrefix("data/gps/lost"))
+        else if (subTopic == "data/gps/lost") {
           DataController.instance.setLost(true);
-        // get devices connection state
-        else if (topic.startsWith(GIDPrefix("data/connection"))) {
-          String device = topic.split('/').last;
-          DataController.instance.updateConnectionState(device, (payload == "1" ? true : false));
+          LocalNoticeService.showNotification(title: "WARNING!", body: "User is not at home");
         }
+        // notify when take off wristband
+        else if (subTopic == "data/health/take-off") {
+          print("wristband taken off");
+
+          DataController.instance.setTakeOff(true);
+          LocalNoticeService.showNotification(
+            title: "WARNING!",
+            body: "Lost vital signs! Wristband may be taken off",
+          );
+        }
+        // get devices connection state
+        else if (subTopic.startsWith("data/status"))
+          DataController.instance.updateConnectionState(topic.split('/').last, payload == "online");
         // update weather info map
-        else if (topic.startsWith(GIDPrefix("data/weather")))
+        else if (subTopic.startsWith("data/weather"))
           DataController.instance.updateWeather(topic.split('/').last, double.tryParse(payload));
         // update health info map
-        else if (topic.startsWith(GIDPrefix("data/health")))
+        else if (subTopic.startsWith("data/health"))
           DataController.instance.updateHealth(topic.split('/').last, double.tryParse(payload));
         // json: lat (float), lng (float)
-        else if (topic.startsWith(GIDPrefix("data/gps"))) {
+        else if (subTopic.startsWith("data/gps")) {
           try {
             Map<String, dynamic> data = jsonDecode(payload);
             DataController.instance.updateGps(
@@ -127,6 +140,4 @@ class MQTTManager {
 Future<void> startMQTT() async {
   final mqttClient = MQTTManager();
   await mqttClient._connectMQTT();
-
-  mqttClient.sub("data/#");
 }

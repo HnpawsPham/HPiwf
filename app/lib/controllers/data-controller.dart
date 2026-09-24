@@ -57,7 +57,7 @@ class DataController extends ChangeNotifier {
   double? lat, lng;
 
   // NOTIFICATION & WARNING
-  bool? fallDetected, lostDetected;
+  bool? fallDetected, lostDetected, takenOffDetected;
 
   // UPDATE FUNCS
   void updateWeather(String key, dynamic value) {
@@ -84,6 +84,11 @@ class DataController extends ChangeNotifier {
 
   void setLost(bool status) {
     lostDetected = status;
+    notifyListeners();
+  }
+
+  void setTakeOff(bool status) {
+    takenOffDetected = status;
     notifyListeners();
   }
 

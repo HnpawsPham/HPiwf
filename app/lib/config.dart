@@ -1,11 +1,10 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
-
-// only and unchangable GID (fix later)
-final String GID = const String.fromEnvironment("GID");
+import 'package:intl/intl.dart';
+import 'package:hpiwf/database/database.dart';
 
 String GIDPrefix(String topic) {
-  return "$GID/$topic";
+  return "${FirebaseDB.chosenGID.value}/topic";
 }
 
 // THEME CONFIG

@@ -3,20 +3,25 @@
 
 #include <secrets.h>
 
-inline const char* ssid = WIFI_SSID;
-inline const char* pass = WIFI_PASS;
+inline const char* const ssid = WIFI_SSID;
+inline const char* const pass = WIFI_PASS;
 
-inline const char* MQTT_SERVER = mqttServer;
-inline const char* MQTT_USERNAME = mqttUsername;
+inline const char* const MQTT_SERVER = mqttServer;
+inline const char* const MQTT_USERNAME = mqttUsername;
 
 // bluetooth devices
-inline const char* STATION_DEVICE_NAME = "stationDevice-HPiwf-23423";
-inline const char* DOOR_DEVICE_NAME = "doorDevice-HPiwf-23423";
-inline const char* KITCHEN_DEVICE_NAME = "kitchenDevice-HPiwf-23423";
+inline const char* const STATION_DEVICE_NAME = "stationDevice-HPiwf-23423";
+inline const char* const DOOR_DEVICE_NAME = "doorDevice-HPiwf-23423";
+inline const char* const KITCHEN_DEVICE_NAME = "kitchenDevice-HPiwf-23423";
 
 // Pins
 inline const int dhtPin = 18;
 inline const int rainPin = 35;
 inline const int airQualityPin = 33;
 inline const int noisePin = 34;
+inline const int bmpSDA = 25;
+inline const int bmpSCL = 26;
+inline const int btRX = 16;
+inline const int btTX = 17; 
+inline const int statePin = 4;
 #endif

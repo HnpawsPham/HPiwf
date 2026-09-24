@@ -1,71 +1,111 @@
 #include <BluetoothSerial.h>
+#include <HardwareSerial.h>
 #include <config.h>
+#include <mqtt-manager.h>
 
 BluetoothSerial bluetooth;
+HardwareSerial hc05(2); //additional bluetooth module
+
+uint8_t doorDeviceMac[6] = {0x00, 0x23, 0x10, 0xA0, 0x2A, 0x47};
+unsigned long lastConnectDoor = 0;
+const unsigned long RECONNECT_WAITTIME = 5000; 
+
+bool doorConnected = 0, kitchenConnected = 0;
+bool lastKitchenStatus = 0;
+
+void connectDoor(){
+    if(!doorConnected){
+        doorConnected = bluetooth.connect(doorDeviceMac, 1, ESP_SPP_SEC_AUTHENTICATE);
+        if(doorConnected){
+            publish("data/status/door-device", "online");
+            Serial.println("connected to door");
+        }
+        else Serial.println("connect to door failed");
+    }
+}
+
+void connectKitchen(){
+    hc05.begin(9600, SERIAL_8N1, btRX, btTX);
+    if(digitalRead(statePin)){
+        publish("data/status/kitchen-device", "online");
+        Serial.println("connected to kitchen");
+    }
+    else Serial.println("connect to kitchen failed");
+}
+    
 
 void initBT(){
     bluetooth.begin(STATION_DEVICE_NAME, 1);
-    bluetooth.setPin("1234"); //HC05 pass
+    bluetooth.setPin("1234"); //child pass
+    delay(500); 
+
+    connectDoor();
+    connectKitchen();
 }
 
-const int duration = 5000;
-
-void getData(const char* senderName){
-    if(bluetooth.connected(0)) 
-        bluetooth.disconnect();
-
-    if(bluetooth.connect(senderName)){
-        Serial.print("Collecting data from ");
-        Serial.println(senderName);
-
-        unsigned long startTime = millis();
-        while (millis() - startTime <= duration){
-            while (bluetooth.available()){
-                char c = bluetooth.read();
-                Serial.write(c);
-            }
+bool sendData(const char* receiverName, const char* val){
+    if(strcmp(receiverName, DOOR_DEVICE_NAME) == 0) {
+        if(!bluetooth.connected()){
+            Serial.println("door BT not connected");
+            publish("data/status/door-device", "offline");
+            doorConnected = 0;
+            return 0;
         }
-    }
-    else{
-        Serial.print("Couldn't connect to ");
-        Serial.println(senderName);
-    }
-}
-
-String curReceiver = "";
-
-void sendData(const char* receiverName, const char* val){
-    if(curReceiver != receiverName){
-        if(bluetooth.connected(0))
-            bluetooth.disconnect();
-    }
-
-    if(bluetooth.connect(receiverName)){
-        curReceiver = receiverName;
-
+  
         Serial.print("Sending data to ");
         Serial.println(receiverName);
-
         bluetooth.println(val);
+        return 1;
     }
-    else{
-        Serial.print("Couldn't connect to ");
+    else if(strcmp(receiverName, KITCHEN_DEVICE_NAME) == 0){      
+        Serial.print("Sending data to ");
         Serial.println(receiverName);
+        hc05.println(val);
     }
+    return 1;
 }
 
-bool changeDevice = 0;
-
 void loopBT(){
-    static unsigned long prevTime = 0;
-    
-    if(millis() - prevTime > duration){
-        prevTime = millis();
+    if(!bluetooth.connected() && millis() - lastConnectDoor > RECONNECT_WAITTIME){
+        lastConnectDoor = millis();
+        connectDoor();
+    }
 
-        if(changeDevice)
-            getData(DOOR_DEVICE_NAME);
-        else getData(KITCHEN_DEVICE_NAME);
-        
-        changeDevice = !changeDevice;
+    if(bluetooth.available()){
+        String data = bluetooth.readStringUntil('\n');
+        data.trim();
+
+        if(data.length()){
+            Serial.println(data);
+            if(data.indexOf("vibration") != -1)
+                publish("data/notification/satellite", "vibration");
+            
+            if(data.indexOf("obstacle") != -1)
+                publish("data/notification/satellite", "obstacle");
+        }
+    }
+
+    kitchenConnected = digitalRead(statePin);
+    if(kitchenConnected != lastKitchenStatus){
+        publish("data/status/kitchen-device", kitchenConnected ? "online" : "offline");
+        lastKitchenStatus = kitchenConnected;
+    }
+    if(!kitchenConnected) return;
+
+    while(Serial.available())
+        hc05.write(Serial.read());
+
+    if(hc05.available()){
+        String data = hc05.readStringUntil('\n');
+        data.trim();
+
+        if(data.length()){
+            Serial.println(data);
+            if(data.indexOf("flame") != -1)
+                publish("data/notification/satellite", "flame");
+            
+            if(data.indexOf("gas") != -1)
+                publish("data/notification/satellite", "gas");
+        }
     }
 }

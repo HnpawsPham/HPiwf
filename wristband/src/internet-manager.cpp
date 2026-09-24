@@ -14,19 +14,13 @@ TinyGsmClient simClient(sim);
 WiFiClient wifiClient;
 PubSubClient client;
 Client* networkClient = nullptr;
-bool CONNECTION_MODE = 0; // 0: wifi, 1: 5g
-
-const int RECONNECT_TRY = 5;
+bool CONNECTION_MODE = 0; // 0: wifi, 1: 5g;
 
 // house internet
 bool connectWifi(){
-    WiFi.begin(ssid, pass);
-
-    int cnt = 0;
-    while(WiFi.status() != WL_CONNECTED && cnt < RECONNECT_TRY){
+    while(WiFi.status() != WL_CONNECTED){
         Serial.print('.');
-        delay(500);
-        cnt++;
+        delay(50);
     }
 
     if(WiFi.status() == WL_CONNECTED){
@@ -43,11 +37,7 @@ bool connectWifi(){
 // sim internet
 int apnID = 0;
 void connect5G(){
-    Serial.println("Connected to Wifi failed, switch to 5g sim");
-
-    simSerial.begin(115200, SERIAL_8N1, simRX, simTX);
-    delay(1000);
-
+    Serial.println("wifi failed, switch to 5g sim");
     sim.restart();
 
     while(!sim.waitForNetwork()){
@@ -61,14 +51,14 @@ void connect5G(){
         Serial.println(apns[apnID]);
 
         sim.gprsDisconnect();
-        delay(1000);
+        delay(100);
 
         if(sim.gprsConnect(apns[apnID], "", ""))
             break;
         else{
             Serial.println("GPRS failed");
             apnID = (apnID + 1) % 4;
-            delay(3000);
+            delay(1000);
         }
     }
 
@@ -78,33 +68,30 @@ void connect5G(){
 }
 
 void initInternet(){    
+    WiFi.begin(ssid, pass);
+    simSerial.begin(115200, SERIAL_8N1, simRX, simTX);
+    
     if(!connectWifi())
         connect5G();
 }
 
-unsigned long lastWifiRetry = 0;
 const unsigned long WIFI_RETRY_WAITTIME = 60000;
+unsigned long lastWifiRetry = 0;
 
 void loopInternet(){
-    unsigned long prevTime = 0;
+    // try to connect to wifi, if fail connect 5g
+    if(networkClient == &wifiClient){
+        if(WiFi.status() != WL_CONNECTED)
+            initInternet();
+    }
+    else{
+        if(!sim.isGprsConnected())
+            sim.gprsConnect(apns[apnID], "", "");
 
-    if(millis() - prevTime > 200){
-        prevTime = millis();
-
-        // try to connect to wifi, if fail connect 5g
-        if(networkClient == &wifiClient){
-            if(WiFi.status() != WL_CONNECTED)
-                initInternet();
-        }
-        else{
-            if(!sim.isGprsConnected())
-                sim.gprsConnect(apns[apnID], "", "");
-
-            // to save sim data
-            if(millis() - lastWifiRetry > WIFI_RETRY_WAITTIME){
-                lastWifiRetry = millis();
-                connectWifi();
-            }
+        // to save sim data
+        if(millis() - lastWifiRetry >= WIFI_RETRY_WAITTIME){
+            lastWifiRetry = millis();
+            connectWifi();
         }
     }
 }

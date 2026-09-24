@@ -177,6 +177,9 @@ class _SettingPageState extends State<SettingPage> {
               if (snapshot.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());
 
+              if (!snapshot.hasData || snapshot.data == null)
+                return const Center(child: Text("User not logged in"));
+
               String curUID = snapshot.data!.uid;
 
               return StreamBuilder<DocumentSnapshot?>(
@@ -186,7 +189,7 @@ class _SettingPageState extends State<SettingPage> {
                     return const Center(child: CircularProgressIndicator());
 
                   Map<String, dynamic>? curUserData =
-                      userSnapshot.data!.data() as Map<String, dynamic>?;
+                      userSnapshot.data?.data() as Map<String, dynamic>?;
 
                   return Column(
                     children: [

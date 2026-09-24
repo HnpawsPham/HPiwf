@@ -4,7 +4,8 @@
 
 void connectWifi();
 void loopMQTT();
-void publish(const char* topic, const float& val);
+void publish(const char* topic, const char* val);
+void publish(const char* topic, const float& value);
 void subscribe(const char* topic);
 
 #endif

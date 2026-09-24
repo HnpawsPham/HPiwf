@@ -4,6 +4,7 @@ import "package:firebase_core/firebase_core.dart";
 import "package:flutter/foundation.dart";
 import '../config.dart';
 import "authentication.dart";
+import 'package:hpiwf/controllers/mqtt-manager.dart';
 
 class FirebaseDB {
   static final FirebaseDB _instance = FirebaseDB._internal();
@@ -22,7 +23,10 @@ class FirebaseDB {
       FirebaseFirestore.instance.collection("users").doc(user.uid).snapshots().listen((doc) {
         if (doc.exists && doc.data() != null) {
           var data = doc.data() as Map<String, dynamic>;
+
           chosenGID.value = data['GID'] ?? "";
+          MQTTManager().sub("${chosenGID.value}/data/#");
+
           print("GID loaded successfully: ${chosenGID.value}");
         } else
           chosenGID.value = "";
