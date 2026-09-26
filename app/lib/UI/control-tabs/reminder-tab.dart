@@ -6,6 +6,7 @@ import "../../controllers/notification-manager.dart";
 import 'package:stroke_text/stroke_text.dart';
 import 'package:intl/intl.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:hpiwf/controllers/data-controller.dart';
 
 class ReminderTab extends StatefulWidget {
   const ReminderTab({super.key});
@@ -106,7 +107,7 @@ class _ReminderTabState extends State<ReminderTab> {
                             right: 25,
                             child: ElevatedButton(
                               onPressed: () {
-                                if (curUserData?["role"] == 0) {
+                                if (!checkPermission(curUserData)) {
                                   notify(context, "You don't have permission to edit!", 5, 500);
                                   return;
                                 }
@@ -170,46 +171,104 @@ Widget medicineSection() {
                 shrinkWrap: true,
                 itemCount: asyncSnapshot.data!.docs.length,
                 itemBuilder: (context, id) {
-                  Map<String, dynamic> data =
-                      asyncSnapshot.data!.docs[id].data() as Map<String, dynamic>;
+                  dynamic doc = asyncSnapshot.data!.docs[id];
+                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-                  return Container(
-                    margin: EdgeInsets.only(top: 10),
+                  return GestureDetector(
+                    onLongPress: () {
+                      if (!checkPermission(curUserData)) {
+                        notify(context, "You don't have permission to edit!", 5, 500);
+                        return;
+                      }
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: colorBlack,
-                    ),
-                    child: Flexible(
-                      fit: FlexFit.loose,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(left: 25, top: 8, bottom: 8),
-                            child: Text(
-                              data["name"],
-                              style: TextStyle(
-                                color: colorWhite,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext buildContext) {
+                          return AlertDialog(
+                            backgroundColor: colorDarkBlue,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            title: Text(
+                              "Delete medicine: ${data["name"]}?",
+                              style: TextStyle(color: colorWhite, fontFamily: "cubano"),
+                            ),
+
+                            actions: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: colorWhite),
+                                onPressed: () {
+                                  String medName = data["name"];
+                                  FirebaseDB.deleteData("medicine", doc.id);
+                                  notify(context, "Medicine $medName is deleted", 4, 200);
+                                  if (DataController
+                                          .instance
+                                          .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                      true)
+                                    LocalNoticeService.showNotification(
+                                      title: "Reminder changed",
+                                      body: "Medicine $medName is deleted",
+                                    );
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "OK",
+                                  style: TextStyle(
+                                    color: colorBlack,
+                                    fontFamily: "cubano",
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                              // Cancel btn
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "Cancel",
+                                  style: TextStyle(color: Colors.red, fontFamily: "cubano"),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(top: 10),
+
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: colorBlack,
+                      ),
+                      child: Flexible(
+                        fit: FlexFit.loose,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(left: 25, top: 8, bottom: 8),
+                              child: Text(
+                                data["name"],
+                                style: TextStyle(
+                                  color: colorWhite,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
 
-                          Container(
-                            margin: EdgeInsets.only(right: 25),
-                            child: Text(
-                              data["time"],
-                              style: TextStyle(
-                                color: colorWhite,
-                                fontSize: 20,
-                                fontFamily: "cubano",
-                                fontWeight: FontWeight.bold,
+                            Container(
+                              margin: EdgeInsets.only(right: 25),
+                              child: Text(
+                                data["time"],
+                                style: TextStyle(
+                                  color: colorWhite,
+                                  fontSize: 20,
+                                  fontFamily: "cubano",
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -269,21 +328,26 @@ Widget bedtimeSection() {
                     readOnly: true,
                     controller: _bedtimeController,
                     onTap: () async {
-                      if (curUserData?["role"] == 0) {
+                      if (!checkPermission(curUserData)) {
                         notify(context, "You don't have permission to edit!", 5, 500);
                         return;
                       }
 
                       await _selectTime(context, _bedtimeController);
 
-                      String wakeTime = _bedtimeController.text.trim();
-                      if (wakeTime.isEmpty) {
+                      String bedtime = _bedtimeController.text.trim();
+                      if (bedtime.isEmpty) {
                         notify(context, "Please set a time.", 3, 404);
                         return;
                       }
 
-                      FirebaseDB.updateData("bedtime", {"sleep": wakeTime});
+                      FirebaseDB.updateData("bedtime", {"sleep": bedtime});
                       notify(context, "Bedtime updated", 3, 200);
+                      if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true)
+                        LocalNoticeService.showNotification(
+                          title: "Reminder changed",
+                          body: "Bedtime is updated to $bedtime",
+                        );
                     },
                     decoration: InputDecoration(
                       hintText: "9:00 PM",
@@ -318,7 +382,7 @@ Widget bedtimeSection() {
                     readOnly: true,
                     controller: _wakeTimeController,
                     onTap: () async {
-                      if (curUserData?["role"] == 0) {
+                      if (!checkPermission(curUserData)) {
                         notify(context, "You don't have permission to edit!", 5, 500);
                         return;
                       }
@@ -332,6 +396,11 @@ Widget bedtimeSection() {
 
                       FirebaseDB.updateData("bedtime", {"wake": wakeTime});
                       notify(context, "Wake time updated", 3, 200);
+                      if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true)
+                        LocalNoticeService.showNotification(
+                          title: "Reminder changed",
+                          body: "Wake time is updated to $wakeTime",
+                        );
                     },
                     decoration: InputDecoration(
                       hintText: "7:00 AM",
@@ -364,7 +433,7 @@ Widget bedtimeSection() {
                     textAlign: TextAlign.center,
                     controller: _bedtimeContentController,
                     onSubmitted: (val) {
-                      if (curUserData?["role"] == 0) {
+                      if (!checkPermission(curUserData)) {
                         notify(context, "You don't have permission to edit!", 5, 500);
                         return;
                       }
@@ -373,6 +442,12 @@ Widget bedtimeSection() {
                       if (content.isNotEmpty) {
                         FirebaseDB.updateData("bedtime", {"content": content});
                         notify(context, "Bedtime content changed", 3, 200);
+                        if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                            true)
+                          LocalNoticeService.showNotification(
+                            title: "Reminder changed",
+                            body: "Bedtime content is changed to $content",
+                          );
                       }
                     },
                     decoration: InputDecoration(
@@ -504,6 +579,11 @@ void _showInputPopup(BuildContext context) {
               if (ok) {
                 FirebaseDB.addData("medicine", {"name": medName, "time": medTime});
                 notify(context, "New medicine reminder added", 4, 200);
+                if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true)
+                  LocalNoticeService.showNotification(
+                    title: "Reminder changed",
+                    body: "Medicine $medName at $medTime is added",
+                  );
                 Navigator.pop(context);
               }
             },

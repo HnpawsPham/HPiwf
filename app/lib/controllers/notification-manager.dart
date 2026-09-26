@@ -26,7 +26,12 @@ class LocalNoticeService {
     );
 
     const details = NotificationDetails(android: androidDetails);
-    await _noti.show(id: 0, title: title, body: body, notificationDetails: details);
+    await _noti.show(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title: title,
+      body: body,
+      notificationDetails: details,
+    );
   }
 }
 

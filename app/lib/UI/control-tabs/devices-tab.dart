@@ -110,7 +110,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       ],
                                                       controller: _doorWidthMinController,
                                                       onSubmitted: (value) {
-                                                        if (curUserData?["role"] == 0) {
+                                                        if (!checkPermission(curUserData)) {
                                                           notify(
                                                             context,
                                                             "You don't have permission to edit!",
@@ -119,11 +119,24 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           );
                                                           return;
                                                         }
+
+                                                        int? doorMin = int.tryParse(
+                                                          _doorWidthMinController.text.trim(),
+                                                        );
+
                                                         FirebaseDB.updateData("setting", {
-                                                          "door-width-min": int.tryParse(
-                                                            _doorWidthMinController.text.trim(),
-                                                          ),
+                                                          "door-width-min": doorMin,
                                                         });
+
+                                                        if (DataController
+                                                                .instance
+                                                                .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                            true)
+                                                          LocalNoticeService.showNotification(
+                                                            title: "Device settings changed",
+                                                            body:
+                                                                "Door width min is set to $doorMin",
+                                                          );
                                                       },
                                                       textAlign: TextAlign.center,
                                                       decoration: InputDecoration(
@@ -161,7 +174,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       ],
                                                       controller: _doorWidthMaxController,
                                                       onSubmitted: (_) {
-                                                        if (curUserData?["role"] == 0) {
+                                                        if (!checkPermission(curUserData)) {
                                                           notify(
                                                             context,
                                                             "You don't have permission to edit!",
@@ -170,11 +183,23 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           );
                                                           return;
                                                         }
+                                                        int? doorMax = int.tryParse(
+                                                          _doorWidthMaxController.text.trim(),
+                                                        );
+
                                                         FirebaseDB.updateData("setting", {
-                                                          "door-width-max": int.tryParse(
-                                                            _doorWidthMaxController.text.trim(),
-                                                          ),
+                                                          "door-width-max": doorMax,
                                                         });
+
+                                                        if (DataController
+                                                                .instance
+                                                                .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                            true)
+                                                          LocalNoticeService.showNotification(
+                                                            title: "Device settings changed",
+                                                            body:
+                                                                "Door width max is set to $doorMax",
+                                                          );
                                                       },
 
                                                       textAlign: TextAlign.center,
@@ -218,7 +243,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                             left: 5,
                                             child: GestureDetector(
                                               onTap: () {
-                                                if (curUserData?["role"] == 0) {
+                                                if (!checkPermission(curUserData)) {
                                                   notify(
                                                     context,
                                                     "You don't have permission to edit!",
@@ -234,6 +259,15 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       .instance
                                                       .devicesSetting["USE_DOOR_DEVICE"]!,
                                                 );
+                                                if (DataController
+                                                        .instance
+                                                        .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                    true)
+                                                  LocalNoticeService.showNotification(
+                                                    title: "Device settings changed",
+                                                    body:
+                                                        "Door device usage is set to ${DataController.instance.devicesSetting["USE_DOOR_DEVICE"]! ? "ON" : "OFF"}",
+                                                  );
                                               },
                                               child: Icon(
                                                 Icons.power_settings_new_sharp,
@@ -322,7 +356,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       ],
                                                       controller: _fireHeightController,
                                                       onSubmitted: (_) {
-                                                        if (curUserData?["role"] == 0) {
+                                                        if (!checkPermission(curUserData)) {
                                                           notify(
                                                             context,
                                                             "You don't have permission to edit!",
@@ -331,11 +365,22 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           );
                                                           return;
                                                         }
+                                                        int? fireHeight = int.tryParse(
+                                                          _fireHeightController.text.trim(),
+                                                        );
                                                         FirebaseDB.updateData("setting", {
-                                                          "fire-height": int.tryParse(
-                                                            _fireHeightController.text.trim(),
-                                                          ),
+                                                          "fire-height": fireHeight,
                                                         });
+
+                                                        if (DataController
+                                                                .instance
+                                                                .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                            true)
+                                                          LocalNoticeService.showNotification(
+                                                            title: "Device settings changed",
+                                                            body:
+                                                                "Fire alert height is set to $fireHeight",
+                                                          );
                                                       },
 
                                                       textAlign: TextAlign.center,
@@ -378,7 +423,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                             left: 5,
                                             child: GestureDetector(
                                               onTap: () {
-                                                if (curUserData?["role"] == 0) {
+                                                if (!checkPermission(curUserData)) {
                                                   notify(
                                                     context,
                                                     "You don't have permission to edit!",
@@ -393,6 +438,15 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       .instance
                                                       .devicesSetting["USE_KITCHEN_DEVICE"]!,
                                                 );
+                                                if (DataController
+                                                        .instance
+                                                        .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                    true)
+                                                  LocalNoticeService.showNotification(
+                                                    title: "Device settings changed",
+                                                    body:
+                                                        "Kitchen device usage is set to ${DataController.instance.devicesSetting["USE_KITCHEN_DEVICE"]! ? "ON" : "OFF"}",
+                                                  );
                                               },
                                               child: Icon(
                                                 Icons.power_settings_new_sharp,
@@ -498,7 +552,7 @@ class _DevicesTabState extends State<DevicesTab> {
                             secondary: Icon(Icons.watch, size: 30),
                             value: USE_WRISTBAND,
                             onChanged: (USE_WRISTBAND) {
-                              if (curUserData?["role"] == 0) {
+                              if (!checkPermission(curUserData)) {
                                 notify(context, "You don't have permission to edit!", 5, 500);
                                 return;
                               }
@@ -507,6 +561,14 @@ class _DevicesTabState extends State<DevicesTab> {
                                 "USE_WRISTBAND",
                                 USE_WRISTBAND,
                               );
+                              if (DataController
+                                      .instance
+                                      .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                  true)
+                                LocalNoticeService.showNotification(
+                                  title: "Device settings changed",
+                                  body: "Wristband usage is set to ${USE_WRISTBAND ? "ON" : "OFF"}",
+                                );
                             },
                           ),
                         ),
@@ -546,7 +608,7 @@ class _DevicesTabState extends State<DevicesTab> {
                             secondary: Icon(Icons.hearing, size: 30),
                             value: USE_HOME_STATION,
                             onChanged: (USE_HOME_STATION) {
-                              if (curUserData?["role"] == 0) {
+                              if (!checkPermission(curUserData)) {
                                 notify(context, "You don't have permission to edit!", 5, 500);
                                 return;
                               }
@@ -555,6 +617,15 @@ class _DevicesTabState extends State<DevicesTab> {
                                 "USE_HOME_STATION",
                                 USE_HOME_STATION,
                               );
+                              if (DataController
+                                      .instance
+                                      .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                  true)
+                                LocalNoticeService.showNotification(
+                                  title: "Device settings changed",
+                                  body:
+                                      "Home station usage is set to ${USE_HOME_STATION ? "ON" : "OFF"}",
+                                );
                             },
                           ),
                         ),

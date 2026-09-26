@@ -24,6 +24,9 @@ class FirebaseDB {
         if (doc.exists && doc.data() != null) {
           var data = doc.data() as Map<String, dynamic>;
 
+          if (chosenGID.value.isNotEmpty) // unsub previous GID
+            MQTTManager().unsub("${chosenGID.value}/data/#");
+
           chosenGID.value = data['GID'] ?? "";
           MQTTManager().sub("${chosenGID.value}/data/#");
 
@@ -76,6 +79,10 @@ class FirebaseDB {
 
   static void updateData(String collection, Map<String, dynamic> data) async {
     await _GIDPrefix(collection).doc("info").set(data, SetOptions(merge: true));
+  }
+
+  static void deleteData(String collection, String docID) async {
+    await _GIDPrefix(collection).doc(docID).delete();
   }
 
   static void updateUser(String userID, Map<String, dynamic> userData) async {

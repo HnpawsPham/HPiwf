@@ -7,6 +7,11 @@ String GIDPrefix(String topic) {
   return "${FirebaseDB.chosenGID.value}/topic";
 }
 
+// check user permission to edit
+bool checkPermission(Map<String, dynamic>? user) {
+  return ((user?["role"] ?? 0) != 0);
+}
+
 // THEME CONFIG
 ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 

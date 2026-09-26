@@ -258,7 +258,9 @@ class DashboardPageState extends State<DashboardPage> with SingleTickerProviderS
                   SizedBox(width: 5),
                   Expanded(
                     child: LinearProgressIndicator(
-                      value: DataController.instance.healthInfo["spo2"].toDouble() ?? 0,
+                      value:
+                          ((DataController.instance.healthInfo["spo2"] ?? 0) as num).toDouble() /
+                          100.0,
                       minHeight: 13,
                       backgroundColor: colorLightBlue,
                       color: Theme.of(context).colorScheme.surface,

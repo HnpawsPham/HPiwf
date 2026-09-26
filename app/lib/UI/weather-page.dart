@@ -5,8 +5,6 @@ import 'package:intl/intl.dart';
 import "../controllers/data-controller.dart";
 import "../controllers/ml-controller.dart";
 
-// weather icon map
-// ['Rainy' 'Cloudy' 'Sunny' 'Snowy']
 final Map<String, String> weatherIcon = {
   "Rainy": "assets/rainy-icon.png",
   "Cloudy": "assets/windy-icon.png",
@@ -63,7 +61,6 @@ class _WeatherPageState extends State<WeatherPage> {
                       return Image.asset(weatherIcon[res.data ?? "Sunny"]!);
                     },
                   ),
-                  // sunny as default
                 ),
                 Text(
                   "${DataController.instance.weatherInfo["temp"] ?? "NaN"}°C",
@@ -222,7 +219,6 @@ class _WeatherPageState extends State<WeatherPage> {
                                   builder: (context, res) {
                                     return Text(
                                       res.data ?? "Unknown",
-                                      //moderate as default
                                       style: TextStyle(
                                         fontFamily: "cubano",
                                         fontSize: 20,
@@ -301,19 +297,14 @@ class _WeatherPageState extends State<WeatherPage> {
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: colorBlack, width: 2),
                                 ),
-                                child: StreamBuilder<String>(
-                                  stream: MLController.getAirQualityStream(),
-                                  builder: (context, res) {
-                                    return Text(
-                                      DataController.instance.getNoiseLvl(),
-                                      style: TextStyle(
-                                        fontFamily: "cubano",
-                                        fontSize: 20,
-                                        color: colorWhite,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    );
-                                  },
+                                child: Text(
+                                  DataController.instance.getNoiseLvl(),
+                                  style: TextStyle(
+                                    fontFamily: "cubano",
+                                    fontSize: 20,
+                                    color: colorWhite,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),

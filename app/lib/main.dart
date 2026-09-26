@@ -9,6 +9,7 @@ import "package:firebase_core/firebase_core.dart";
 import "package:hpiwf/firebase_options.dart";
 import "./database/authentication.dart";
 import "controllers/notification-manager.dart";
+import 'package:hpiwf/controllers/data-controller.dart';
 
 late final FirebaseApp app;
 late final FirebaseAuth auth;
@@ -16,9 +17,9 @@ late final FirebaseAuth auth;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MLController.init();
   await startMQTT();
   await LocalNoticeService.init();
+  await DataController.instance.loadSettings();
 
   // initialize firebase
   app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -28,6 +29,7 @@ void main() async {
   // get current GID
   FirebaseDB.initGIDListener(auth);
 
+  await MLController.init();
   runApp(const App());
 }
 

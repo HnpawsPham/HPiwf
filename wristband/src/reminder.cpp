@@ -46,7 +46,7 @@ void remindDrinkMed(const char* time) {
 
         String medName = reminderList.substring(st, en); 
         speaker.connecttospeech(("Đã đến giờ uống thuốc " + medName).c_str(), "vi");
-        publish(GIDPrefix("data/notification"), ("Medicine " + medName + " reminder was sent").c_str());
+        publish(GIDPrefix("data/notification/reminder"), ("Medicine " + medName + " reminder was sent").c_str());
         pos += 10;
     }
 }
@@ -76,7 +76,7 @@ void loopNTP(){
     
     if(!bedtimeList.isEmpty()){
         remindBedtime(time);
-        publish(GIDPrefix("data/notification"), "Bedtime reminder was sent");
+        publish(GIDPrefix("data/notification/reminder"), "Bedtime reminder was sent");
     }
     
     if(!reminderList.isEmpty())

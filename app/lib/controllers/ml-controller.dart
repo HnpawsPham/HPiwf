@@ -1,7 +1,8 @@
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 import 'package:flutter/services.dart';
-import "data-controller.dart";
+import 'package:hpiwf/controllers/data-controller.dart';
 import 'dart:convert';
+import "notification-manager.dart";
 
 class MLController {
   static final MLController _instance = MLController._internal();
@@ -34,10 +35,8 @@ class MLController {
     if (DataController.instance.weatherInfo["precipitation"] == null ||
         DataController.instance.weatherInfo["temp"] == null ||
         DataController.instance.weatherInfo["humid"] == null ||
-        DataController.instance.weatherInfo["air-pressure"] == null) {
-      print("default result: sunny");
+        DataController.instance.weatherInfo["air-pressure"] == null)
       return "Sunny"; // as default
-    }
 
     // convert months to input shape
     final month = DateTime.now().month;
@@ -71,7 +70,6 @@ class MLController {
     final outputs = await _weatherTypeSession.run(<String, OrtValue>{inp: inputs});
 
     final res = await outputs[out]!.asList();
-    print("weather ok");
     inputs.dispose();
     for (final tensor in outputs.values) tensor.dispose();
 
@@ -118,6 +116,9 @@ class MLController {
         _airQualityLe[res.first.toString()] ?? _airQualityLe[res.first] ?? res.first.toString();
 
     print("air label= $label");
+    if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true &&
+        (label == "Poor" || label == "Hazardous"))
+      LocalNoticeService.showNotification(title: "Bad air quality", body: "Air quality is $label");
     return label;
   }
 

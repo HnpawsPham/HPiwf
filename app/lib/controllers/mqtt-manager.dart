@@ -1,7 +1,7 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-import "data-controller.dart";
+import 'package:hpiwf/controllers/data-controller.dart';
 import 'dart:convert';
 import "../config.dart";
 import "notification-manager.dart";
@@ -66,6 +66,13 @@ class MQTTManager {
     }
   }
 
+  void unsub(String topic) {
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+      client.unsubscribe(topic);
+      print("unsubscribed to ${topic}");
+    }
+  }
+
   void pub(String topic, String payload) {
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
       final builder = MqttClientPayloadBuilder();
@@ -90,25 +97,64 @@ class MQTTManager {
 
         // notify when fall
         if (subTopic == "data/health/fall") {
+          if (DataController.instance.appSetting["ACCEPT_ALERTS"] == false) return;
+
           DataController.instance.setFall(true);
-          print("fall detected");
-          LocalNoticeService.showNotification(title: "WARNING!", body: "Fall detect");
+          LocalNoticeService.showNotification(title: "WRISTBAND WARNING!", body: "Fall detect");
         }
         // notify when lost (geofencing upcoming)
-        else if (subTopic == "data/gps/lost") {
-          DataController.instance.setLost(true);
-          LocalNoticeService.showNotification(title: "WARNING!", body: "User is not at home");
-        }
+        // else if (subTopic == "data/gps/lost") {
+        // if (DataController.instance.appSetting["ACCEPT_ALERTS"] == false)
+        //   return;
+        //   DataController.instance.setLost(true);
+        //   LocalNoticeService.showNotification(
+        //     title: "WRISTBAND WARNING!",
+        //     body: "User is not at home",
+        //   );
+        // }
         // notify when take off wristband
         else if (subTopic == "data/health/take-off") {
-          print("wristband taken off");
+          if (DataController.instance.appSetting["ACCEPT_ALERTS"] == false) return;
 
           DataController.instance.setTakeOff(true);
           LocalNoticeService.showNotification(
-            title: "WARNING!",
+            title: "WRISTBAND WARNING!",
             body: "Lost vital signs! Wristband may be taken off",
           );
         }
+        // warning from satellites
+        else if (subTopic == "data/notification/satellite") {
+          if (DataController.instance.appSetting["ACCEPT_ALERTS"] == false) return;
+
+          if (payload == "vibration")
+            LocalNoticeService.showNotification(
+              title: "DOOR DEVICE WARNING!",
+              body: "Vibration detected at Door device. Potential tampering or removal attempt",
+            );
+          else if (payload == "obstacle")
+            LocalNoticeService.showNotification(
+              title: "DOOR DEVICE WARNING!",
+              body: "Obstruction detected at Door device. Please check the doorway",
+            );
+          else if (payload == "flame")
+            LocalNoticeService.showNotification(
+              title: "KITCHEN DEVICE WARNING!",
+              body: "Flame detected at Kitchen device. Please check the kitchen",
+            );
+          else if (payload == "gas")
+            LocalNoticeService.showNotification(
+              title: "KITCHEN DEVICE WARNING!",
+              body: "Gas leak detected at Kitchen device. Please check the kitchen",
+            );
+        }
+        // reminder completion notifications from wristband
+        else if (subTopic == "data/notification/reminder") {
+          if (DataController.instance.appSetting["ACCEPT_COMPLETION_NOTIFICATIONS"] == true)
+            LocalNoticeService.showNotification(title: "Wristband status", body: payload);
+        }
+        // other home station notifications
+        else if (subTopic == "data/notification/connection")
+          LocalNoticeService.showNotification(title: "Home station status", body: payload);
         // get devices connection state
         else if (subTopic.startsWith("data/status"))
           DataController.instance.updateConnectionState(topic.split('/').last, payload == "online");

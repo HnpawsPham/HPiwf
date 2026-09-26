@@ -1,6 +1,8 @@
 // control data routes to display UI
 import 'package:flutter/material.dart';
 import "../database/database.dart";
+import "notification-manager.dart";
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DataController extends ChangeNotifier {
   static final DataController instance = DataController._internal();
@@ -42,12 +44,12 @@ class DataController extends ChangeNotifier {
 
   // Map<String, dynamic> weatherInfo = {
   //   "precipitation": 1009,
-  //   "humid": 0.7,
+  //   "humid": 0.8,
   //   "air-pressure": 1024,
-  //   "rain-val": 0,
+  //   "rain-val": 1243,
   //   "temp": 31,
-  //   "air-ppm": 234,
-  //   "noise-delta": 10,
+  //   "air-ppm": 10000,
+  //   "noise-delta": 1340,
   // };
 
   // HEALTH INFO
@@ -67,6 +69,30 @@ class DataController extends ChangeNotifier {
 
   void updateHealth(String key, dynamic value) {
     healthInfo[key] = value;
+
+    if (key == "bpm") {
+      if (value > 0 && value < 40)
+        LocalNoticeService.showNotification(
+          title: "HEALTH WARNING!",
+          body: "Low beats per minutue detected: $value",
+        );
+      else if (value > 130)
+        LocalNoticeService.showNotification(
+          title: "HEALTH WARNING!",
+          body: "High beats per minutue detected: $value",
+        );
+    } else if (key == "spo2") {
+      if (value == 0)
+        LocalNoticeService.showNotification(
+          title: "HEALTH WARNING!",
+          body: "SpO2 level is 0%. Potential taking off wristband",
+        );
+      else if (value < 95)
+        LocalNoticeService.showNotification(
+          title: "HEALTH WARNING!",
+          body: "SpO2 level is low: $value%",
+        );
+    }
     notifyListeners();
   }
 
@@ -99,9 +125,12 @@ class DataController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAppSetting(String key, bool val) {
+  Future<void> updateAppSetting(String key, bool val) async {
     appSetting[key] = val;
     notifyListeners();
+
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool(key, val);
   }
 
   // UPDATE DEVICES CONNECTION STATES
@@ -114,15 +143,26 @@ class DataController extends ChangeNotifier {
   String getNoiseLvl() {
     final noise = weatherInfo["noise-delta"];
     if (noise == null) return "Unknown";
-    if (noise > 1000) return "High";
+    if (noise > 1000) {
+      LocalNoticeService.showNotification(
+        title: "Bad condition",
+        body: "It's abnormally loud outside",
+      );
+      return "High";
+    }
     if (noise > 600) return "Moderate";
     return "Normal";
   }
 
   String getRainLvl() {
-    final rain = weatherInfo["rain-val"];
+    int? rain = weatherInfo["rain-val"];
     if (rain == null) return "Unknown";
-    if (rain > 100) return "Heavy Rain";
+
+    rain = 4095 - rain;
+    if (rain > 1000) {
+      LocalNoticeService.showNotification(title: "Bad weather", body: "It's heavy rain outside");
+      return "Heavy Rain";
+    }
     if (rain > 0) return "Light Rain";
     return "Dry";
   }
@@ -143,5 +183,16 @@ class DataController extends ChangeNotifier {
       "ACCEPT_ALERTS": true,
     };
     notifyListeners();
+  }
+
+  // SAVE USER NOTIFICATION PREFERENCES
+  Future<void> loadSettings() async {
+    final pref = await SharedPreferences.getInstance();
+
+    appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] =
+        pref.getBool("ACCEPT_UPDATE_NOTIFICATIONS") ?? true;
+    appSetting["ACCEPT_COMPLETION_NOTIFICATIONS"] =
+        pref.getBool("ACCEPT_COMPLETION_NOTIFICATIONS") ?? true;
+    appSetting["ACCEPT_ALERTS"] = pref.getBool("ACCEPT_ALERTS") ?? true;
   }
 }
