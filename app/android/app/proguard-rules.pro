@@ -9,6 +9,14 @@
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
 
+-keepattributes *Annotation*
+-keepclassmembers class * {
+    @com.google.firebase.database.IgnoreExtraProperties <fields>;
+}
+-keepclassmembers class * {
+    @com.google.firebase.firestore.IgnoreExtraProperties <fields>;
+}
+
 # Keep HTTP / OkHttp / Networking
 -keep class com.squareup.okhttp3.** { *; }
 -keep class okhttp3.** { *; }

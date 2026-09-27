@@ -16,6 +16,7 @@ late final FirebaseAuth auth;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await loadTheme();
 
   await startMQTT();
   await LocalNoticeService.init();

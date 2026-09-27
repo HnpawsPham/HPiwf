@@ -169,6 +169,7 @@ Widget medicineSection() {
         child: _hasMedicine
             ? ListView.builder(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: asyncSnapshot.data!.docs.length,
                 itemBuilder: (context, id) {
                   dynamic doc = asyncSnapshot.data!.docs[id];
@@ -196,7 +197,7 @@ Widget medicineSection() {
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: colorWhite),
                                 onPressed: () {
-                                  String medName = data["name"];
+                                  String medName = data["name"] ?? "Named loaded error";
                                   FirebaseDB.deleteData("medicine", doc.id);
                                   notify(context, "Medicine $medName is deleted", 4, 200);
                                   if (DataController
@@ -238,37 +239,34 @@ Widget medicineSection() {
                         borderRadius: BorderRadius.circular(20),
                         color: colorBlack,
                       ),
-                      child: Flexible(
-                        fit: FlexFit.loose,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(left: 25, top: 8, bottom: 8),
-                              child: Text(
-                                data["name"],
-                                style: TextStyle(
-                                  color: colorWhite,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 25, top: 8, bottom: 8),
+                            child: Text(
+                              data["name"],
+                              style: TextStyle(
+                                color: colorWhite,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                          ),
 
-                            Container(
-                              margin: EdgeInsets.only(right: 25),
-                              child: Text(
-                                data["time"],
-                                style: TextStyle(
-                                  color: colorWhite,
-                                  fontSize: 20,
-                                  fontFamily: "cubano",
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          Container(
+                            margin: EdgeInsets.only(right: 25),
+                            child: Text(
+                              data["time"],
+                              style: TextStyle(
+                                color: colorWhite,
+                                fontSize: 20,
+                                fontFamily: "cubano",
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   );

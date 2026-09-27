@@ -2,6 +2,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:hpiwf/database/database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 String GIDPrefix(String topic) {
   return "${FirebaseDB.chosenGID.value}/topic";
@@ -14,6 +15,18 @@ bool checkPermission(Map<String, dynamic>? user) {
 
 // THEME CONFIG
 ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
+Future<void> loadTheme() async {
+  final pref = await SharedPreferences.getInstance();
+  final isDark = pref.getBool('isDarkMode') ?? true;
+  themeNotifier.value = isDark ? ThemeMode.dark : ThemeMode.light;
+}
+
+Future<void> toggleTheme() async {
+  final pref = await SharedPreferences.getInstance();
+  final isDark = themeNotifier.value == ThemeMode.dark;
+  themeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+  await pref.setBool('isDarkMode', !isDark);
+}
 
 const Color colorWhite = Color.fromARGB(255, 210, 240, 255);
 const Color colorBlack = Color(0xFF04040c);

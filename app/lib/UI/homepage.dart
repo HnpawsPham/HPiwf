@@ -69,11 +69,7 @@ class _HomePageState extends State<HomePage> {
             valueListenable: themeNotifier,
             builder: (context, value, child) {
               return IconButton(
-                onPressed: () {
-                  themeNotifier.value = themeNotifier.value == ThemeMode.dark
-                      ? ThemeMode.light
-                      : ThemeMode.dark;
-                },
+                onPressed: () => toggleTheme(),
                 icon: Container(
                   child: Icon(
                     value == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,

@@ -404,7 +404,7 @@ class _UsersTabState extends State<UsersTab> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
                 ],
               );
             },
