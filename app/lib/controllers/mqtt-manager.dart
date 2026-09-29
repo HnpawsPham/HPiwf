@@ -62,14 +62,12 @@ class MQTTManager {
   void sub(String topic) {
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
       client.subscribe(topic, QosMap[topic] ?? MqttQos.atMostOnce);
-      print("subscribed to ${topic}");
     }
   }
 
   void unsub(String topic) {
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
       client.unsubscribe(topic);
-      print("unsubscribed to ${topic}");
     }
   }
 
@@ -79,7 +77,6 @@ class MQTTManager {
       builder.addString(payload);
 
       client.publishMessage(GIDPrefix(topic), MqttQos.atLeastOnce, builder.payload!);
-      print("publish $payload to $topic");
     }
   }
 
@@ -156,11 +153,17 @@ class MQTTManager {
         else if (subTopic == "data/notification/connection")
           LocalNoticeService.showNotification(title: "Home station status", body: payload);
         // get devices connection state
-        else if (subTopic.startsWith("data/status"))
-          DataController.instance.updateConnectionState(topic.split('/').last, payload == "online");
+        else if (subTopic.startsWith("data/status")) {
+          bool isOn = (payload == "online");
+          String device = topic.split('/').last;
+
+          if (DataController.instance.connectionInfo[device] != isOn)
+            DataController.instance.updateConnectionState(device, isOn);
+        }
         // update weather info map
         else if (subTopic.startsWith("data/weather"))
           DataController.instance.updateWeather(topic.split('/').last, double.tryParse(payload));
+        // DataController.instance.updateWeather(topic.split('/').last, double.tryParse(payload));
         // update health info map
         else if (subTopic.startsWith("data/health"))
           DataController.instance.updateHealth(topic.split('/').last, double.tryParse(payload));

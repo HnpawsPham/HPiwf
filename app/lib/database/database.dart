@@ -52,12 +52,10 @@ class FirebaseDB {
         .snapshots();
   }
 
-  static void getData(String collection) async {
+  static Future<Map<String, dynamic>?> getData(String collection) async {
     QuerySnapshot res = await _GIDPrefix(collection).get();
-    if (res.docs.isNotEmpty)
-      for (var doc in res.docs) print(doc.data());
-    else
-      print("collection doesnt exist or empty");
+    if (res.docs.isNotEmpty) return res.docs.first.data() as Map<String, dynamic>;
+    return null;
   }
 
   static void addData(String collection, Map<String, dynamic> data) async {

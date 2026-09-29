@@ -5,7 +5,7 @@ import 'package:hpiwf/database/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 String GIDPrefix(String topic) {
-  return "${FirebaseDB.chosenGID.value}/topic";
+  return "${FirebaseDB.chosenGID.value}/$topic";
 }
 
 // check user permission to edit

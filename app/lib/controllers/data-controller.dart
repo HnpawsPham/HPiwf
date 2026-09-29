@@ -27,7 +27,7 @@ class DataController extends ChangeNotifier {
   Map<String, bool> connectionInfo = {
     "home-station": false,
     "kitchen-device": false,
-    "home-device": false,
+    "door-device": false,
     "wristband": false,
   };
 
@@ -155,7 +155,7 @@ class DataController extends ChangeNotifier {
   }
 
   String getRainLvl() {
-    int? rain = weatherInfo["rain-val"];
+    double? rain = weatherInfo["rain-val"];
     if (rain == null) return "Unknown";
 
     rain = 4095 - rain;
@@ -189,8 +189,7 @@ class DataController extends ChangeNotifier {
   Future<void> loadSettings() async {
     final pref = await SharedPreferences.getInstance();
 
-    appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] =
-        pref.getBool("ACCEPT_UPDATE_NOTIFICATIONS") ?? true;
+    appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] = pref.getBool("ACCEPT_UPDATE_NOTIFICATIONS") ?? true;
     appSetting["ACCEPT_COMPLETION_NOTIFICATIONS"] =
         pref.getBool("ACCEPT_COMPLETION_NOTIFICATIONS") ?? true;
     appSetting["ACCEPT_ALERTS"] = pref.getBool("ACCEPT_ALERTS") ?? true;

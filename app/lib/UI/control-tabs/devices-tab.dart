@@ -6,6 +6,7 @@ import 'package:hpiwf/database/authentication.dart';
 import 'package:hpiwf/database/database.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:flutter/services.dart';
+import 'package:hpiwf/controllers/mqtt-manager.dart';
 
 class DevicesTab extends StatefulWidget {
   const DevicesTab({super.key});
@@ -109,7 +110,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                         FilteringTextInputFormatter.digitsOnly,
                                                       ],
                                                       controller: _doorWidthMinController,
-                                                      onSubmitted: (value) {
+                                                      onSubmitted: (value) async {
                                                         if (!checkPermission(curUserData)) {
                                                           notify(
                                                             context,
@@ -124,9 +125,22 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           _doorWidthMinController.text.trim(),
                                                         );
 
+                                                        dynamic settingData =
+                                                            await FirebaseDB.getData("setting");
+
+                                                        double doorMax =
+                                                            (settingData?["door-width-max"] as num?)
+                                                                ?.toDouble() ??
+                                                            0.0;
+
                                                         FirebaseDB.updateData("setting", {
                                                           "door-width-min": doorMin,
                                                         });
+
+                                                        MQTTManager().pub(
+                                                          "data/setting/door-size",
+                                                          '{"min":"$doorMin","max":"$doorMax"}',
+                                                        );
 
                                                         if (DataController
                                                                 .instance
@@ -173,7 +187,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                         FilteringTextInputFormatter.digitsOnly,
                                                       ],
                                                       controller: _doorWidthMaxController,
-                                                      onSubmitted: (_) {
+                                                      onSubmitted: (_) async {
                                                         if (!checkPermission(curUserData)) {
                                                           notify(
                                                             context,
@@ -185,6 +199,19 @@ class _DevicesTabState extends State<DevicesTab> {
                                                         }
                                                         int? doorMax = int.tryParse(
                                                           _doorWidthMaxController.text.trim(),
+                                                        );
+
+                                                        dynamic settingData =
+                                                            await FirebaseDB.getData("setting");
+
+                                                        double doorMin =
+                                                            (settingData?["door-width-min"] as num?)
+                                                                ?.toDouble() ??
+                                                            0.0;
+
+                                                        MQTTManager().pub(
+                                                          "data/setting/door-size",
+                                                          '{"min":"$doorMin","max":"$doorMax"}',
                                                         );
 
                                                         FirebaseDB.updateData("setting", {
@@ -368,9 +395,14 @@ class _DevicesTabState extends State<DevicesTab> {
                                                         int? fireHeight = int.tryParse(
                                                           _fireHeightController.text.trim(),
                                                         );
+
                                                         FirebaseDB.updateData("setting", {
                                                           "fire-height": fireHeight,
                                                         });
+                                                        MQTTManager().pub(
+                                                          "data/setting/flame-threshold",
+                                                          fireHeight.toString(),
+                                                        );
 
                                                         if (DataController
                                                                 .instance

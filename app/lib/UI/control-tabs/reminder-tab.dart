@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:hpiwf/controllers/mqtt-manager.dart";
 import "../../config.dart";
 import "../../database/authentication.dart";
 import "../../database/database.dart";
@@ -199,6 +200,13 @@ Widget medicineSection() {
                                 onPressed: () {
                                   String medName = data["name"] ?? "Named loaded error";
                                   FirebaseDB.deleteData("medicine", doc.id);
+
+                                  if (data["name"] != null)
+                                    MQTTManager().pub(
+                                      "data/del-reminder",
+                                      '{"name":"${data["name"]}","time":"${data["time"]}"}',
+                                    );
+
                                   notify(context, "Medicine $medName is deleted", 4, 200);
                                   if (DataController
                                           .instance
@@ -577,6 +585,8 @@ void _showInputPopup(BuildContext context) {
               if (ok) {
                 FirebaseDB.addData("medicine", {"name": medName, "time": medTime});
                 notify(context, "New medicine reminder added", 4, 200);
+                MQTTManager().pub("data/reminder", '{"time":"$medTime","name":"$medName"}');
+
                 if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true)
                   LocalNoticeService.showNotification(
                     title: "Reminder changed",

@@ -22,15 +22,16 @@ class MLController {
     _weatherTypeLe = jsonDecode(
       await rootBundle.loadString('assets/ML-models/weather-type-le.json'),
     );
+    print("weather ML filed loaded");
+
     _airQualityLe = jsonDecode(
       await rootBundle.loadString('assets/ML-models/air-quality-label.json'),
     );
+    print("air ML files loaded");
   }
 
   // WEATHER TYPE PREDICT HANDLE
   static Future<String> predictWeatherType() async {
-    print("weather ML filed loaded");
-
     // check if all inputs valid
     if (DataController.instance.weatherInfo["precipitation"] == null ||
         DataController.instance.weatherInfo["temp"] == null ||
@@ -73,22 +74,22 @@ class MLController {
     inputs.dispose();
     for (final tensor in outputs.values) tensor.dispose();
 
-    print(_weatherTypeLe[res.first] ?? "Sunny");
-    return _weatherTypeLe[res.first] ?? "Sunny";
+    final label =
+        _weatherTypeLe[res.first.toString()] ?? _weatherTypeLe[res.first] ?? res.first.toString();
+    print("weather label = $label");
+    return label;
   }
 
   static Stream<String> getWeatherTypeStream() async* {
     while (true) {
       String result = await predictWeatherType();
       yield result;
-      await Future.delayed(const Duration(seconds: 1800));
+      await Future.delayed(const Duration(seconds: 300));
     }
   }
 
   // AIR QUALITY PREDICT HANDLE
   static Future<String> predictAirQuality() async {
-    print("air ML files loaded");
-
     // check if all inputs valid
     if (DataController.instance.weatherInfo["temp"] == null ||
         DataController.instance.weatherInfo["air-ppm"] == null ||
@@ -116,9 +117,11 @@ class MLController {
         _airQualityLe[res.first.toString()] ?? _airQualityLe[res.first] ?? res.first.toString();
 
     print("air label= $label");
+
     if (DataController.instance.appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] == true &&
         (label == "Poor" || label == "Hazardous"))
       LocalNoticeService.showNotification(title: "Bad air quality", body: "Air quality is $label");
+
     return label;
   }
 
@@ -126,7 +129,7 @@ class MLController {
     while (true) {
       String result = await predictAirQuality();
       yield result;
-      await Future.delayed(const Duration(seconds: 1800));
+      await Future.delayed(const Duration(seconds: 300));
     }
   }
 }
