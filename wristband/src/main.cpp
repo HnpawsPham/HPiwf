@@ -11,16 +11,18 @@ void setup(){
     Serial.begin(115200);
 
     // initialize components
+    initMPU();
+    delay(1000);
+
     initGPS();
     delay(1000);
 
     // initHeartSensor();
     // delay(500);
 
-    initMPU();
     initSpeaker();
     delay(1000);
-
+    
     initInternet();
     initMQTT();
 
@@ -33,7 +35,6 @@ void setup(){
 }
 
 unsigned long prevTime = 0;
-
 void loop(){
     speaker.loop();
 

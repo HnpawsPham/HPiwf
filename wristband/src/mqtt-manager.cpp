@@ -72,6 +72,7 @@ void callback(const char* topic, const byte* payload, unsigned int len){
                         pref.begin("reminder");
                         pref.putString("reminderList", reminderList);
                         pref.end();
+                        publish("data/notification/reminder", ("Medicine " + name + " reminder was deleted").c_str());
                         break;
                     }
                 }
@@ -83,6 +84,7 @@ void callback(const char* topic, const byte* payload, unsigned int len){
             pref.begin("bedtime");
             pref.remove("bedtimeList");
             pref.end();
+            publish("data/notification/reminder", "Bedtime reminder was deleted");
         }
     }
 

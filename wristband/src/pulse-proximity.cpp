@@ -66,28 +66,30 @@ void handleSPO2(){
 }
 
 // INITALIZE AND USAGE
+bool heartOk = 1;
 void initHeartSensor(){
-    Wire.begin(sdaPin, sclPin);
-
-    if(!heartSensor.begin(Wire, I2C_SPEED_FAST)){
+    if(!heartSensor.begin(Wire, I2C_SPEED_STANDARD)){
         Serial.println("Heart sensor error");
+        heartOk = 0;
         return;
     }
     setupHeartBeat();
 }
 
-const int duration = 30000;
+const int duration = 15000;
 int MODE = 0; //0: heartbeat, 1: sleep, 2: spo2, 3: sleep
-bool started = 1;
+bool started = 0;
 
 void loopHeartSensor(){
+    if(!heartOk) return;
+    
     static unsigned long prevTime = 0;
 
     if(millis() - prevTime >= duration){
         prevTime = millis(); 
         
         if(MODE == 0){
-            beatCnt *= 2;
+            beatCnt *= 4;
             
             Serial.print("BPM: ");
             Serial.println(beatCnt);
@@ -95,11 +97,12 @@ void loopHeartSensor(){
             publish("data/health/bpm", String(beatCnt).c_str());
 
             // take off alert
-            if(TAKE_OFF_ALERT && beatCnt <= 10 && started) 
+            if(TAKE_OFF_ALERT && beatCnt <= 10 && started){
                 Serial.println("take off wristband detect");
-            publish("data/health/take-off", "1");
+                publish("data/health/take-off", "1");
+            }
 
-            started = 0;
+            started = 1;
             setupSleep();
         }
         else if(MODE == 1)

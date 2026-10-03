@@ -10,9 +10,9 @@ inline bool TAKE_OFF_ALERT = 1;
 inline const char* const wristbandName = "HPiwf-wristband283947";
 
 // pinouts
-inline const int blckPin = 27;
-inline const int lrcPin = 14;
-inline const int dinPin = 32;
+inline const int blckPin = 19;
+inline const int lrcPin = 18;
+inline const int dinPin = 23;
 
 inline const int sdaPin = 21;
 inline const int sclPin = 22;
@@ -24,8 +24,8 @@ inline const int simRX = 16;
 inline const int simTX = 17;
 
 // hardware serials
-inline const int gpsHS = 1;
-inline const int simHS = 2;
+inline const int gpsHS = 2;
+inline const int simHS = 1;
 
 // 5G
 inline const char* const apns[] = {

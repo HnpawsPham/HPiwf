@@ -56,15 +56,15 @@ void loopSensors(){
         publish("data/weather/air-ppm", airPpm);
 
         int rainVal = analogRead(rainPin);
-        // Serial.print("Rain val: ");
-        // Serial.println(rainVal);
+        Serial.print("Rain val: ");
+        Serial.println(rainVal);
         publish("data/weather/rain-val", rainVal);
 
         float airPressureVal = bmp.readPressure();
-        if(isnan(airPressureVal)) airPressureVal = 1013.25;
+        if(isnan(airPressureVal)) airPressureVal = 101325;
         // Serial.print("Air pressure: ");
         // Serial.println(airPressureVal);
-        publish("data/weather/air-pressure", airPressureVal);
+        publish("data/weather/air-pressure", airPressureVal/ 100);
 
         if(maxAmp != -1){
             // Serial.print("Noise delta: ");

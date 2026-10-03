@@ -143,14 +143,14 @@ class DataController extends ChangeNotifier {
   String getNoiseLvl() {
     final noise = weatherInfo["noise-delta"];
     if (noise == null) return "Unknown";
-    if (noise > 1000) {
+    if (noise > 600) {
       LocalNoticeService.showNotification(
         title: "Bad condition",
         body: "It's abnormally loud outside",
       );
       return "High";
     }
-    if (noise > 600) return "Moderate";
+    if (noise > 60) return "Moderate";
     return "Normal";
   }
 
@@ -159,10 +159,12 @@ class DataController extends ChangeNotifier {
     if (rain == null) return "Unknown";
 
     rain = 4095 - rain;
-    if (rain > 1000) {
+    if (rain > 3000) {
       LocalNoticeService.showNotification(title: "Bad weather", body: "It's heavy rain outside");
       return "Heavy Rain";
     }
+    if(rain > 1500)
+        return "Normal Rain"
     if (rain > 0) return "Light Rain";
     return "Dry";
   }

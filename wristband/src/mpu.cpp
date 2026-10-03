@@ -16,12 +16,32 @@ float winAx[WINSZ], winAy[WINSZ], winAz[WINSZ];
 float winGx[WINSZ], winGy[WINSZ], winGz[WINSZ];
 
 void initMPU() {
-    Wire.begin(sdaPin, sclPin);
+    Wire.begin(sdaPin, sclPin, 100000);
+    Wire.setClock(50);
+    
     if(!mpu.begin()) {
         Serial.println("MPU error");
         return;
     }
     Serial.println("MPU found");
+}
+
+bool checkData(const sensors_event_t &a, const sensors_event_t &g) {
+    if(isnan(a.acceleration.x) || isnan(a.acceleration.y) || isnan(a.acceleration.z)) 
+        return 0;
+    if(isnan(g.gyro.x) || isnan(g.gyro.y) || isnan(g.gyro.z))
+        return 0;
+
+    if(isinf(a.acceleration.x) || isinf(a.acceleration.y) || isinf(a.acceleration.z)) 
+        return 0;
+    if(isinf(g.gyro.x) || isinf(g.gyro.y) || isinf(g.gyro.z)) 
+        return 0;
+
+    if(abs(a.acceleration.x) > 150.0f || abs(a.acceleration.y) > 150.0f || abs(a.acceleration.z) > 150.0f) 
+        return 0;
+    if(abs(g.gyro.x) > 35.0f || abs(g.gyro.y) > 35.0f || abs(g.gyro.z) > 35.0f)
+        return 0;
+    return 1;
 }
 
 void calc(float *a, int len, float &mean, float &std, float &minn, float &maxx, float &p2p) {
@@ -166,6 +186,7 @@ void loopMPU() {
 
         sensors_event_t a, g, temp;
         mpu.getEvent(&a, &g, &temp);
+        if(!checkData(a, g)) return;
 
         winAx[buffId] = a.acceleration.x;
         winAy[buffId] = a.acceleration.y;
