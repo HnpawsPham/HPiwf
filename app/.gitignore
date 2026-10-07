@@ -11,6 +11,10 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+vercel.json
+.github
+.metadata
+pubspec.lock
 
 # IntelliJ / VS Code
 *.iml

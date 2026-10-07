@@ -60,15 +60,12 @@ class MQTTManager {
   }
 
   void sub(String topic) {
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+    if (client.connectionStatus!.state == MqttConnectionState.connected)
       client.subscribe(topic, QosMap[topic] ?? MqttQos.atMostOnce);
-    }
   }
 
   void unsub(String topic) {
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      client.unsubscribe(topic);
-    }
+    if (client.connectionStatus!.state == MqttConnectionState.connected) client.unsubscribe(topic);
   }
 
   void pub(String topic, String payload) {
@@ -97,7 +94,11 @@ class MQTTManager {
           if (DataController.instance.appSetting["ACCEPT_ALERTS"] == false) return;
 
           DataController.instance.setFall(true);
-          LocalNoticeService.showNotification(title: "WRISTBAND WARNING!", body: "Fall detect");
+          LocalNoticeService.showNotification(
+            title: "WRISTBAND WARNING!",
+            body: "Fall detect",
+            level: "max",
+          );
         }
         // notify when lost (geofencing upcoming)
         // else if (subTopic == "data/gps/lost") {
@@ -117,6 +118,7 @@ class MQTTManager {
           LocalNoticeService.showNotification(
             title: "WRISTBAND WARNING!",
             body: "Lost vital signs! Wristband may be taken off",
+            level: "max",
           );
         }
         // warning from satellites
@@ -127,21 +129,25 @@ class MQTTManager {
             LocalNoticeService.showNotification(
               title: "DOOR DEVICE WARNING!",
               body: "Vibration detected at Door device. Potential tampering or removal attempt",
+              level: "max",
             );
           else if (payload == "obstacle")
             LocalNoticeService.showNotification(
               title: "DOOR DEVICE WARNING!",
               body: "Obstruction detected at Door device. Please check the doorway",
+              level: "max",
             );
           else if (payload == "flame")
             LocalNoticeService.showNotification(
               title: "KITCHEN DEVICE WARNING!",
               body: "Flame detected at Kitchen device. Please check the kitchen",
+              level: "max",
             );
           else if (payload == "gas")
             LocalNoticeService.showNotification(
               title: "KITCHEN DEVICE WARNING!",
               body: "Gas leak detected at Kitchen device. Please check the kitchen",
+              level: "max",
             );
         }
         // reminder completion notifications from wristband

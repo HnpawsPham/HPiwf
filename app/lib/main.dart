@@ -19,13 +19,15 @@ void main() async {
   await loadTheme();
 
   await startMQTT();
-  await LocalNoticeService.init();
-  await DataController.instance.loadSettings();
 
   // initialize firebase
   app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   auth = FirebaseAuth.instanceFor(app: app);
   await FBAuth.initGoogleSignIn();
+
+  // other services
+  await LocalNoticeService.init();
+  await DataController.instance.loadSettings();
 
   // get current GID
   FirebaseDB.initGIDListener(auth);

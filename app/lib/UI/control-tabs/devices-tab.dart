@@ -16,7 +16,8 @@ class DevicesTab extends StatefulWidget {
 }
 
 class _DevicesTabState extends State<DevicesTab> {
-  final TextEditingController _fireHeightController = TextEditingController();
+  final TextEditingController _flameThresholdController = TextEditingController();
+  final TextEditingController _gasThresholdController = TextEditingController();
   final TextEditingController _doorWidthMinController = TextEditingController();
   final TextEditingController _doorWidthMaxController = TextEditingController();
 
@@ -142,6 +143,12 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           '{"min":"$doorMin","max":"$doorMax"}',
                                                         );
 
+                                                        notify(
+                                                          context,
+                                                          "Door width min is set",
+                                                          3,
+                                                          200,
+                                                        );
                                                         if (DataController
                                                                 .instance
                                                                 .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -218,6 +225,12 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           "door-width-max": doorMax,
                                                         });
 
+                                                        notify(
+                                                          context,
+                                                          "Door width max is set",
+                                                          3,
+                                                          200,
+                                                        );
                                                         if (DataController
                                                                 .instance
                                                                 .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -362,13 +375,30 @@ class _DevicesTabState extends State<DevicesTab> {
                                                 colorBlendMode: BlendMode.srcIn,
                                               ),
                                               SizedBox(height: 10),
-                                              Text(
-                                                "Alert height",
-                                                style: TextStyle(
-                                                  fontFamily: "cubano",
-                                                  fontSize: 18,
-                                                  color: Theme.of(context).colorScheme.surface,
-                                                ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "Flame & Gas",
+                                                    style: TextStyle(
+                                                      fontFamily: "cubano",
+                                                      fontSize: 18,
+                                                      color: Theme.of(context).colorScheme.surface,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Tooltip(
+                                                    message:
+                                                        "Unit: variation (max - min) measured over each time interval",
+                                                    triggerMode: TooltipTriggerMode.tap,
+                                                    showDuration: const Duration(seconds: 4),
+                                                    child: Icon(
+                                                      Icons.info_outline,
+                                                      size: 20,
+                                                      color: colorBlack,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                               SizedBox(height: 10),
                                               Row(
@@ -381,7 +411,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       inputFormatters: [
                                                         FilteringTextInputFormatter.digitsOnly,
                                                       ],
-                                                      controller: _fireHeightController,
+                                                      controller: _flameThresholdController,
                                                       onSubmitted: (_) {
                                                         if (!checkPermission(curUserData)) {
                                                           notify(
@@ -392,18 +422,24 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           );
                                                           return;
                                                         }
-                                                        int? fireHeight = int.tryParse(
-                                                          _fireHeightController.text.trim(),
+                                                        int? flameThreshold = int.tryParse(
+                                                          _flameThresholdController.text.trim(),
                                                         );
 
                                                         FirebaseDB.updateData("setting", {
-                                                          "fire-height": fireHeight,
+                                                          "flame-threshold": flameThreshold,
                                                         });
                                                         MQTTManager().pub(
                                                           "data/setting/flame-threshold",
-                                                          fireHeight.toString(),
+                                                          flameThreshold.toString(),
                                                         );
 
+                                                        notify(
+                                                          context,
+                                                          "Flame threshold is set",
+                                                          3,
+                                                          200,
+                                                        );
                                                         if (DataController
                                                                 .instance
                                                                 .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -411,7 +447,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                           LocalNoticeService.showNotification(
                                                             title: "Device settings changed",
                                                             body:
-                                                                "Fire alert height is set to $fireHeight",
+                                                                "Flame threshold is set to $flameThreshold unit",
                                                           );
                                                       },
 
@@ -436,12 +472,70 @@ class _DevicesTabState extends State<DevicesTab> {
                                                     ),
                                                   ),
                                                   SizedBox(width: 10),
-                                                  Text(
-                                                    "cm",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontFamily: "cubano",
-                                                      color: Theme.of(context).colorScheme.surface,
+                                                  Expanded(
+                                                    child: TextField(
+                                                      keyboardType: TextInputType.number,
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter.digitsOnly,
+                                                      ],
+                                                      controller: _gasThresholdController,
+                                                      onSubmitted: (_) {
+                                                        if (!checkPermission(curUserData)) {
+                                                          notify(
+                                                            context,
+                                                            "You don't have permission to edit!",
+                                                            5,
+                                                            500,
+                                                          );
+                                                          return;
+                                                        }
+                                                        int? gasThreshold = int.tryParse(
+                                                          _gasThresholdController.text.trim(),
+                                                        );
+
+                                                        FirebaseDB.updateData("setting", {
+                                                          "gas-threshold": gasThreshold,
+                                                        });
+                                                        MQTTManager().pub(
+                                                          "data/setting/gas-threshold",
+                                                          gasThreshold.toString(),
+                                                        );
+
+                                                        notify(
+                                                          context,
+                                                          "Gas threshold is set",
+                                                          3,
+                                                          200,
+                                                        );
+                                                        if (DataController
+                                                                .instance
+                                                                .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
+                                                            true)
+                                                          LocalNoticeService.showNotification(
+                                                            title: "Device settings changed",
+                                                            body:
+                                                                "Gas threshold is set to $gasThreshold unit",
+                                                          );
+                                                      },
+
+                                                      textAlign: TextAlign.center,
+                                                      decoration: InputDecoration(
+                                                        fillColor: Theme.of(
+                                                          context,
+                                                        ).colorScheme.surface,
+                                                        filled: true,
+                                                        contentPadding: EdgeInsets.all(0),
+                                                        hintText: "200",
+                                                        hintStyle: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurface
+                                                              .withValues(alpha: 0.7),
+                                                        ),
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(20),
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                   SizedBox(width: 10),

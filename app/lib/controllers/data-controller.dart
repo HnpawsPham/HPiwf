@@ -164,7 +164,7 @@ class DataController extends ChangeNotifier {
       return "Heavy Rain";
     }
     if(rain > 1500)
-        return "Normal Rain"
+        return "Normal Rain";
     if (rain > 0) return "Light Rain";
     return "Dry";
   }
