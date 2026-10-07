@@ -24,8 +24,9 @@ jobs:
 
       - name: Create secret files
         run: |
+          mkdir -p app/lib
           echo '${{ secrets.HPIWF_SECRETS }}' > app/secrets.json
-          echo '${{ secrets.FIREBASE_OPTIONS_FILE }}' > app/lib/firebase_options.dart
+          echo '${{ secrets.FIREBASE_OPTIONS_FILE }}' | base64 -d > app/lib/firebase_options.dart
 
       - name: Build Web
         run: |
