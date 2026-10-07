@@ -22,8 +22,10 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create secrets.json
-        run: echo '${{ secrets.HPIWF_SECRETS }}' > app/secrets.json
+      - name: Create secret files
+        run: |
+          echo '${{ secrets.HPIWF_SECRETS }}' > app/secrets.json
+          echo '${{ secrets.FIREBASE_OPTIONS_FILE }}' > app/lib/firebase_options.dart
 
       - name: Build Web
         run: |
