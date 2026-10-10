@@ -1,0 +1,9 @@
+flutter/
+node_modules/
+.git/
+.github/
+ios/
+android/
+windows/
+macos/
+linux/
