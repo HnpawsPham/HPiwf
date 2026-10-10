@@ -299,6 +299,7 @@ class _DevicesTabState extends State<DevicesTab> {
                                                       .instance
                                                       .devicesSetting["USE_DOOR_DEVICE"]!,
                                                 );
+
                                                 if (DataController
                                                         .instance
                                                         .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -558,12 +559,14 @@ class _DevicesTabState extends State<DevicesTab> {
                                                   );
                                                   return;
                                                 }
+
                                                 DataController.instance.updateDevicesSetting(
                                                   "USE_KITCHEN_DEVICE",
                                                   !DataController
                                                       .instance
                                                       .devicesSetting["USE_KITCHEN_DEVICE"]!,
                                                 );
+
                                                 if (DataController
                                                         .instance
                                                         .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -682,11 +685,13 @@ class _DevicesTabState extends State<DevicesTab> {
                                 notify(context, "You don't have permission to edit!", 5, 500);
                                 return;
                               }
+
                               setState() => USE_WRISTBAND = !USE_WRISTBAND;
                               DataController.instance.updateDevicesSetting(
                                 "USE_WRISTBAND",
                                 USE_WRISTBAND,
                               );
+
                               if (DataController
                                       .instance
                                       .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==
@@ -739,10 +744,12 @@ class _DevicesTabState extends State<DevicesTab> {
                                 return;
                               }
                               setState() => USE_HOME_STATION = !USE_HOME_STATION;
+
                               DataController.instance.updateDevicesSetting(
                                 "USE_HOME_STATION",
                                 USE_HOME_STATION,
                               );
+
                               if (DataController
                                       .instance
                                       .appSetting["ACCEPT_UPDATE_NOTIFICATIONS"] ==

@@ -29,8 +29,7 @@ class FirebaseDB {
 
           chosenGID.value = data['GID'] ?? "";
           MQTTManager().sub("${chosenGID.value}/data/#");
-
-          print("GID loaded successfully: ${chosenGID.value}");
+          print("GID loaded successfully");
         } else
           chosenGID.value = "";
       });

@@ -234,6 +234,7 @@ class _UsersTabState extends State<UsersTab> {
                                                 elevation: 16,
                                                 borderRadius: BorderRadius.circular(15),
                                                 style: const TextStyle(
+                                                  fontFamily: "oldstyle",
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 18,
                                                 ),

@@ -408,7 +408,7 @@ class _SettingPageState extends State<SettingPage> {
                                   child: Center(
                                     child: Text(
                                       "This account is linked with Google.",
-                                      style: TextStyle(fontSize: 20),
+                                      style: TextStyle(fontSize: 20, color: colorWhite),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),

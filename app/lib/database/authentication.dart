@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import "../controllers/notification-manager.dart";
 import "database.dart";
+import 'package:flutter/foundation.dart';
 
 class FBAuth {
   static final FBAuth _instance = FBAuth._internal();
@@ -50,16 +51,19 @@ class FBAuth {
 
   static Future<void> signInWithGoogle() async {
     try {
-      final acc = await GoogleSignIn.instance.authenticate();
-      final ggAuth = await acc.authentication;
+      if (kIsWeb) {
+        GoogleAuthProvider authProvider = GoogleAuthProvider();
+        await FirebaseAuth.instance.signInWithPopup(authProvider);
+      } else {
+        final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      if (ggAuth != null) {
-        final credential = GoogleAuthProvider.credential(idToken: ggAuth.idToken);
+        final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken);
 
         await FirebaseAuth.instance.signInWithCredential(credential);
       }
     } catch (e) {
-      print(e);
+      print("Google Sign-In error: $e");
     }
   }
 
@@ -81,19 +85,5 @@ class FBAuth {
   }
 
   // check user authentication state
-  static Stream<User?> get authStateChange =>
-      FirebaseAuth.instance.idTokenChanges().asyncMap((user) async {
-        if (user == null) return null;
-
-        try {
-          await user.reload();
-          return user;
-        } on FirebaseAuthException catch (e) {
-          if (e.code == "user-not-found") {
-            await FirebaseAuth.instance.signOut();
-            return null;
-          }
-        }
-        return user;
-      });
+  static Stream<User?> get authStateChange => FirebaseAuth.instance.authStateChanges();
 }

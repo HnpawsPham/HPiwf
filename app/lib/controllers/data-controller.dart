@@ -14,6 +14,7 @@ class DataController extends ChangeNotifier {
     "USE_WRISTBAND": true,
     "USE_DOOR_DEVICE": true,
     "USE_KITCHEN_DEVICE": true,
+    "TAKE_OFF_ALERT": true,
     "USE_HOME_STATION": true,
   };
 
@@ -163,8 +164,7 @@ class DataController extends ChangeNotifier {
       LocalNoticeService.showNotification(title: "Bad weather", body: "It's heavy rain outside");
       return "Heavy Rain";
     }
-    if(rain > 1500)
-        return "Normal Rain";
+    if (rain > 1500) return "Normal Rain";
     if (rain > 0) return "Light Rain";
     return "Dry";
   }

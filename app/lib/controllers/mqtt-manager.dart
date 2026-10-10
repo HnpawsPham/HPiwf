@@ -1,6 +1,9 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
+import 'package:flutter/foundation.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+import 'mqtt-client-fallback.dart'
+    if (dart.library.js_interop) 'mqtt-client-web.dart'
+    if (dart.library.io) 'mqtt-client-io.dart';
 import 'package:hpiwf/controllers/data-controller.dart';
 import 'dart:convert';
 import "../config.dart";
@@ -22,11 +25,10 @@ class MQTTManager {
   factory MQTTManager() => _instance;
   MQTTManager._internal();
 
-  static late MqttServerClient client;
+  static late MqttClient client;
 
   Future<void> _connectMQTT() async {
-    client = MqttServerClient(MQTT_SERVER, MQTT_CLIENT_ID);
-
+    client = createMqttClient(MQTT_SERVER, MQTT_CLIENT_ID, MQTT_PORT);
     client.logging(on: false);
     client.port = MQTT_PORT;
     client.autoReconnect = true;

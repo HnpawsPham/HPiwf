@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hpiwf/config.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 
-// DEVICE NOTIFICATION
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (kIsWeb) return;
   final title = message.notification?.title ?? message.data['title'];
   final body = message.notification?.body ?? message.data['body'];
-
   final level = message.data['priority'] ?? 'low';
 
   await LocalNoticeService.showNotification(title: title, body: body, level: level);
@@ -20,6 +20,8 @@ class LocalNoticeService {
   static final _noti = FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
+    if (kIsWeb) return;
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
 
@@ -31,6 +33,7 @@ class LocalNoticeService {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (kIsWeb) return;
       final title = message.notification?.title ?? message.data['title'];
       final body = message.notification?.body ?? message.data['body'];
       final level = message.data['priority'] ?? 'low';
@@ -44,6 +47,8 @@ class LocalNoticeService {
     required String body,
     String level = 'high',
   }) async {
+    if (kIsWeb) return;
+
     Importance importance;
     Priority priority;
     bool isFullScreen = false;
@@ -83,7 +88,6 @@ class LocalNoticeService {
   }
 }
 
-// IN APP NOTIFICATION
 Map<int, ToastificationType> notificationType = {
   200: ToastificationType.success,
   500: ToastificationType.error,
