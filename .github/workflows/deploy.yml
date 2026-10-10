@@ -31,13 +31,14 @@ jobs:
       - name: Build Web
         run: |
           cd app
+          git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter
+          export PATH="$PATH:`pwd`/flutter/bin"
           flutter pub get
           flutter build web --dart-define-from-file=secrets.json
-          cp vercel.json build/web/
 
       - name: Deploy to Vercel
         run: |
-          cd app/build/web
+          cd app
           npx vercel@latest deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
