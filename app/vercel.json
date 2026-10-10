@@ -1,5 +1,5 @@
 {
-  "buildCommand": "flutter build web --release",
+  "buildCommand": "flutter build web --release --dart-define-from-file=secrets.json",
   "outputDirectory": "build/web",
   "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter && export PATH=\"$PATH:`pwd`/flutter/bin\" && flutter pub get",
   "cleanUrls": true,
