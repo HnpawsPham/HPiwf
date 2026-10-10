@@ -1,7 +1,7 @@
 {
-  "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter && export PATH=\"$(pwd)/flutter/bin:$PATH\" && flutter pub get",
-  "buildCommand": "export PATH=\"$(pwd)/flutter/bin:$PATH\" && flutter build web --release --dart-define-from-file=secrets.json",
-  "outputDirectory": "build/web",
+  "installCommand": "cd app && git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter && export PATH=\"$(pwd)/flutter/bin:$PATH\" && flutter pub get",
+  "buildCommand": "cd app && export PATH=\"$(pwd)/flutter/bin:$PATH\" && flutter build web --release --dart-define-from-file=secrets.json",
+  "outputDirectory": "app/build/web",
   "cleanUrls": true,
   "rewrites": [
     {
