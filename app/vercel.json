@@ -4,6 +4,10 @@
   "outputDirectory": "build/web",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
-  ]
+  {
+    "source": "/assets/((?!assets/|AssetManifest|FontManifest|NOTICES|fonts/|shaders/Packages/).*)",
+    "destination": "/assets/assets/$1"
+  },
+  { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
+]
 }
